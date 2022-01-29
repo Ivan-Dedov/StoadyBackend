@@ -1,4 +1,4 @@
-# Stoady Mobile Application (Back)
+# Stoady Mobile Application (Back-end)
 
 ## Credits
 Dedov Ivan Nikolaevich
