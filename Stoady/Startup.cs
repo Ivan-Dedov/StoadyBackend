@@ -9,6 +9,9 @@ namespace Stoady
 {
     public class Startup
     {
+        public const string VersionName = "0.100";
+        public const string ApplicationName = "Stoady";
+
         public IConfiguration Configuration { get; }
 
         public Startup(IConfiguration configuration)
@@ -25,9 +28,12 @@ namespace Stoady
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
-                app.UseSwaggerUI(c =>
-                    c.SwaggerEndpoint("/swagger/v1/swagger.json",
-                        "Stoady v1"));
+                app.UseSwaggerUI(
+                    c =>
+                        c.SwaggerEndpoint(
+                            $"/swagger/{VersionName}/swagger.json",
+                            ApplicationName)
+                );
             }
 
             app.UseHttpsRedirection();
@@ -45,7 +51,12 @@ namespace Stoady
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Stoady", Version = "v1" });
+                c.SwaggerDoc(VersionName,
+                    new OpenApiInfo
+                    {
+                        Title = ApplicationName,
+                        Version = VersionName
+                    });
             });
         }
     }
