@@ -1,9 +1,17 @@
+using System;
+using System.IO;
+using System.Reflection;
+using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Stoady.Handlers.Authentication.Authorization;
+using Stoady.Repositories;
 
 namespace Stoady
 {
@@ -45,9 +53,10 @@ namespace Stoady
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }
 
-        public void ConfigureServices(
+        public static void ConfigureServices(
             IServiceCollection services)
         {
+            // TODO: Add FluentValidation
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
@@ -57,7 +66,30 @@ namespace Stoady
                         Title = ApplicationName,
                         Version = VersionName
                     });
+
+                var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
             });
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.RequireHttpsMetadata = false;
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidIssuer = AuthorizationOptions.Issuer,
+                        ValidateAudience = true,
+                        ValidAudience = AuthorizationOptions.Audience,
+                        ValidateLifetime = true,
+                        IssuerSigningKey = AuthorizationOptions.GetSymmetricSecurityKey(),
+                        ValidateIssuerSigningKey = true
+                    };
+                });
+
+            services.AddMediatR(typeof(Startup));
+
+            services.AddSingleton<IUserRepository, UserRepository>();
         }
     }
 }
