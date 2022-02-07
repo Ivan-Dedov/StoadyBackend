@@ -1,7 +1,7 @@
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Stoady.Handlers.Authentication.Authorization
+namespace Stoady.Helpers
 {
     public static class AuthorizationOptions
     {

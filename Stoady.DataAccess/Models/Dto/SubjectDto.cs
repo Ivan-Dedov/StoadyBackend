@@ -1,4 +1,4 @@
-namespace Stoady.Models.Dto
+namespace Stoady.Database.Models.Dto
 {
     public sealed class SubjectDto
     {

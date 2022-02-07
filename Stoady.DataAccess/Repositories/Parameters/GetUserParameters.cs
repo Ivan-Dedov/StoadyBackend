@@ -1,4 +1,4 @@
-namespace Stoady.Repositories.Parameters
+namespace Stoady.Database.Repositories.Parameters
 {
     public sealed record GetUserParameters
     {

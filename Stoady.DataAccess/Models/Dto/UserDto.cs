@@ -1,4 +1,4 @@
-namespace Stoady.Models.Dto
+namespace Stoady.Database.Models.Dto
 {
     public sealed class UserDto
     {
@@ -10,6 +10,6 @@ namespace Stoady.Models.Dto
 
         public string Password { get; init; }
 
-        public long AvatarId { get; init; }
+        public int AvatarId { get; init; }
     }
 }

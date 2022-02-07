@@ -1,4 +1,4 @@
-namespace Stoady
+namespace Stoady.Models
 {
     public enum Role
     {
