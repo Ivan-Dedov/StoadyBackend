@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Reflection;
+using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -56,9 +57,7 @@ namespace Stoady
                 var response =
                     new
                     {
-                        source = exception.Source,
-                        error = exception.Message,
-                        stackTrace = exception.StackTrace
+                        error = exception.Message
                     };
                 await context.Response.WriteAsJsonAsync(response);
             }));
@@ -69,7 +68,6 @@ namespace Stoady
         public static void ConfigureServices(
             IServiceCollection services)
         {
-            // todo add validators?
             services.AddControllers();
 
             services.AddSwaggerGen(c =>
@@ -104,6 +102,8 @@ namespace Stoady
             // todo? services.AddLogging(builder => builder.AddConsole());
 
             services.AddMediatR(typeof(Startup));
+            services.AddValidatorsFromAssemblies(new [] {Assembly.GetExecutingAssembly() });
+            services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
             services.AddSingleton<IUserRepository, UserRepository>();
         }
