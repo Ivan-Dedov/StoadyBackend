@@ -11,6 +11,7 @@ namespace Stoady.Database.Repositories
     {
         public static string BuildConnectionString()
         {
+            // todo
             return $"Host=localhost;" +
                    $"Username=administrator;" +
                    $"Password=assdinsan;" +
