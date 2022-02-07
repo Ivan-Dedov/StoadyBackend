@@ -1,18 +1,15 @@
 using System;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.Tokens;
 using Npgsql;
-using Stoady.Handlers.Authentication.Authorization;
+using Stoady.Database.Models.Dto;
+using Stoady.Database.Repositories;
+using Stoady.Database.Repositories.Parameters;
+using Stoady.Helpers;
 using Stoady.Models;
 using Stoady.Models.Handlers.Authentication;
-using Stoady.Repositories;
-using Stoady.Repositories.Parameters;
 
 namespace Stoady.Handlers.Authentication
 {
@@ -48,7 +45,7 @@ namespace Stoady.Handlers.Authentication
 
             return new AuthenticationResponse
             {
-                Token = GenerateToken(user.Id),
+                Token = TokenManager.GenerateToken(user.Id),
                 User = user
             };
         }
@@ -58,9 +55,10 @@ namespace Stoady.Handlers.Authentication
             string password,
             CancellationToken cancellationToken)
         {
+            UserDto userDto;
             try
             {
-                return await _userRepository.GetUser(
+                userDto = await _userRepository.GetUser(
                     new GetUserParameters
                     {
                         Email = email,
@@ -71,32 +69,16 @@ namespace Stoady.Handlers.Authentication
             catch (PostgresException ex)
             {
                 _logger.LogWarning(ex.Message);
-                throw new BadHttpRequestException("Failed to authenticate: User Not Found.");
+                throw new ApplicationException("Authentication failed.");
             }
-        }
 
-        private static string GenerateToken(
-            long userId)
-        {
-            var tokenHandler = new JwtSecurityTokenHandler();
-
-            var tokenDescriptor = new SecurityTokenDescriptor
+            return new User
             {
-                Subject = new ClaimsIdentity(
-                    new Claim[]
-                    {
-                        new Claim(CustomJwtClaim.Id, userId.ToString())
-                    }),
-                Expires = DateTime.UtcNow.AddHours(AuthorizationOptions.ExpirationTimeHours),
-                Issuer = AuthorizationOptions.Issuer,
-                Audience = AuthorizationOptions.Audience,
-                SigningCredentials = new SigningCredentials(
-                    AuthorizationOptions.GetSymmetricSecurityKey(),
-                    SecurityAlgorithms.HmacSha256Signature)
+                Id = userDto.Id,
+                Email = userDto.Email,
+                Username = userDto.Username,
+                AvatarId = userDto.AvatarId
             };
-
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            return tokenHandler.WriteToken(token);
         }
     }
 }

@@ -2,7 +2,7 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Stoady", "Stoady\Stoady.csproj", "{16F1134F-8142-49B7-BBE4-3AC11C2AFFE2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Stoady.Database", "Stoady.Database\Stoady.Database.csproj", "{DFC50AC5-FA6E-4DAA-AC85-530204E3CCAF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Stoady.DataAccess", "Stoady.DataAccess\Stoady.DataAccess.csproj", "{DFC50AC5-FA6E-4DAA-AC85-530204E3CCAF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

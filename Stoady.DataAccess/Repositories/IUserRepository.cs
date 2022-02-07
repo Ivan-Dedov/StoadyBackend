@@ -1,13 +1,13 @@
 using System.Threading;
 using System.Threading.Tasks;
-using Stoady.Models;
-using Stoady.Repositories.Parameters;
+using Stoady.Database.Models.Dto;
+using Stoady.Database.Repositories.Parameters;
 
-namespace Stoady.Repositories
+namespace Stoady.Database.Repositories
 {
     public interface IUserRepository
     {
-        public Task<User> GetUser(
+        public Task<UserDto> GetUser(
             GetUserParameters parameters,
             CancellationToken cancellationToken);
     }

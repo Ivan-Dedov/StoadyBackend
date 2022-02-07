@@ -4,14 +4,16 @@ using System.Reflection;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Stoady.Handlers.Authentication.Authorization;
-using Stoady.Repositories;
+using Stoady.Database.Repositories;
+using Stoady.Helpers;
 
 namespace Stoady
 {
@@ -37,11 +39,7 @@ namespace Stoady
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
                 app.UseSwaggerUI(
-                    c =>
-                        c.SwaggerEndpoint(
-                            $"/swagger/{VersionName}/swagger.json",
-                            ApplicationName)
-                );
+                    c => c.SwaggerEndpoint($"/swagger/{VersionName}/swagger.json", ApplicationName));
             }
 
             app.UseHttpsRedirection();
@@ -50,14 +48,30 @@ namespace Stoady
 
             app.UseAuthorization();
 
+            app.UseExceptionHandler(c => c.Run(async context =>
+            {
+                var exception = context.Features
+                    .Get<IExceptionHandlerPathFeature>()
+                    .Error;
+                var response =
+                    new
+                    {
+                        source = exception.Source,
+                        error = exception.Message,
+                        stackTrace = exception.StackTrace
+                    };
+                await context.Response.WriteAsJsonAsync(response);
+            }));
+
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }
 
         public static void ConfigureServices(
             IServiceCollection services)
         {
-            // TODO: Add FluentValidation
+            // todo add validators?
             services.AddControllers();
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc(VersionName,
@@ -86,6 +100,8 @@ namespace Stoady
                         ValidateIssuerSigningKey = true
                     };
                 });
+
+            // todo? services.AddLogging(builder => builder.AddConsole());
 
             services.AddMediatR(typeof(Startup));
 
