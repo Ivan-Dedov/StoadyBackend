@@ -5,7 +5,7 @@ namespace Stoady.Handlers.User.UpdateUserAvatar
     public class UpdateUserAvatarCommandValidator : AbstractValidator<UpdateUserAvatarCommand>
     {
         private const int MinAvatarIndex = 0;
-        private const int MaxAvatarIndex = 15;
+        private const int MaxAvatarIndex = 14;
 
         public UpdateUserAvatarCommandValidator()
         {
