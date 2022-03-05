@@ -8,6 +8,6 @@ namespace Stoady.DataAccess.Models.Dao
 
         public long UserId { get; init; }
 
-        public long RoleId { get; init; }
+        public long RoleId { get; set; }
     }
 }

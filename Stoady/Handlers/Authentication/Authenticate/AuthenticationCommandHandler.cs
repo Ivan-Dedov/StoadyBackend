@@ -10,7 +10,7 @@ namespace Stoady.Handlers.Authentication.Authenticate
     public sealed class AuthenticationCommandHandler
         : IRequestHandler<AuthenticationCommand, AuthenticationResponse>
     {
-        public Task<AuthenticationResponse> Handle(
+        public async Task<AuthenticationResponse> Handle(
             AuthenticationCommand request,
             CancellationToken cancellationToken)
         {

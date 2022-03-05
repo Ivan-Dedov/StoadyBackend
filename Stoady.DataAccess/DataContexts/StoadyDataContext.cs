@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -10,7 +9,7 @@ namespace Stoady.DataAccess.DataContexts
 {
     public sealed class StoadyDataContext : DbContext
     {
-        #region Таблицы
+        #region Tables
 
         public DbSet<UserDao> Users { get; set; }
 

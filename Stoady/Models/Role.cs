@@ -1,4 +1,4 @@
-namespace Stoady.Models.Handlers.Team.ChangeMemberStatus
+namespace Stoady.Models
 {
     public enum Role
     {

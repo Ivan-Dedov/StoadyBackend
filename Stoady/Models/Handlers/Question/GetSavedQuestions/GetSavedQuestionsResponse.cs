@@ -1,7 +1,11 @@
+using System.Collections.Generic;
+
 namespace Stoady.Models.Handlers.Question.GetSavedQuestions
 {
-    public sealed record GetSavedQuestionsResponse
+    public sealed class GetSavedQuestionsResponse
     {
-        //todo
+        public long UserId { get; init; }
+
+        public List<SavedQuestion> SavedQuestions { get; init; }
     }
 }

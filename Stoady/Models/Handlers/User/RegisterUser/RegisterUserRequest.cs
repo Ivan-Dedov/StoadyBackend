@@ -1,7 +1,7 @@
 namespace Stoady.Models.Handlers.User.RegisterUser
 {
     public sealed record RegisterUserRequest(
-        string Name,
+        string Username,
         string Email,
         string Password);
 }

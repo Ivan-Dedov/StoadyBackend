@@ -8,6 +8,6 @@ namespace Stoady.DataAccess.Models.Dao
 
         public long TopicId { get; init; }
 
-        public int Result { get; init; }
+        public int Result { get; set; }
     }
 }

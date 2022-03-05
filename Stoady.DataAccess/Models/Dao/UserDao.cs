@@ -8,8 +8,8 @@ namespace Stoady.DataAccess.Models.Dao
 
         public string Email { get; init; }
 
-        public string Password { get; init; }
+        public string Password { get; set; }
 
-        public int AvatarId { get; init; }
+        public int AvatarId { get; set; }
     }
 }

@@ -4,11 +4,11 @@ namespace Stoady.DataAccess.Models.Dao
     {
         public long Id { get; init; }
 
-        public string Title { get; init; }
+        public string Title { get; set; }
 
-        public string Image { get; init; }
+        public string Image { get; set; }
 
-        public string Description { get; init; }
+        public string Description { get; set; }
 
         public long TeamId { get; init; }
     }

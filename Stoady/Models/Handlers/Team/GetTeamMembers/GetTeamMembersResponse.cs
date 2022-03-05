@@ -1,7 +1,9 @@
+using System.Collections.Generic;
+
 namespace Stoady.Models.Handlers.Team.GetTeamMembers
 {
-    public sealed record GetTeamMembersResponse
+    public sealed class GetTeamMembersResponse
     {
-        //todo
+        public List<MemberInTeam> Members { get; init; }
     }
 }

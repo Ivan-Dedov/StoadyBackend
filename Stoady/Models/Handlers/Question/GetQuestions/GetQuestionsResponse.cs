@@ -1,7 +1,9 @@
+using System.Collections.Generic;
+
 namespace Stoady.Models.Handlers.Question.GetQuestions
 {
-    public sealed record GetQuestionsResponse
+    public sealed class GetQuestionsResponse
     {
-        // todo
+        public List<QuestionInTopic> Questions { get; init; }
     }
 }

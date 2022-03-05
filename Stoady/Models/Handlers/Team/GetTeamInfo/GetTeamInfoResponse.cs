@@ -1,7 +1,13 @@
+using System.Collections.Generic;
+
 namespace Stoady.Models.Handlers.Team.GetTeamInfo
 {
-    public sealed record GetTeamInfoResponse
+    public sealed class GetTeamInfoResponse
     {
-        //todo
+        public string Name { get; init; }
+
+        public string Picture { get; init; }
+
+        public List<SubjectInTeam> Subjects { get; init; }
     }
 }

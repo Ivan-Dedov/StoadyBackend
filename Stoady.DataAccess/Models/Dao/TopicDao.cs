@@ -4,9 +4,9 @@ namespace Stoady.DataAccess.Models.Dao
     {
         public long Id { get; init; }
 
-        public string Title { get; init; }
+        public string Title { get; set; }
 
-        public string Description { get; init; }
+        public string Description { get; set; }
 
         public long SubjectId { get; init; }
     }

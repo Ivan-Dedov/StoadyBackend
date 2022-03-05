@@ -1,7 +1,9 @@
+using System.Collections.Generic;
+
 namespace Stoady.Models.Handlers.Statistics.GetUserStatistics
 {
-    public sealed record GetUserStatisticsResponse
+    public sealed class GetUserStatisticsResponse
     {
-        // todo
+        public List<TopicStatistics> Results { get; init; }
     }
 }
