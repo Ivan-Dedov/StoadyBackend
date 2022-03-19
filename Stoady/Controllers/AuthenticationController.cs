@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -32,7 +33,7 @@ namespace Stoady.Controllers
         /// <param name="token"></param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<AuthenticationResponse> Authenticate(
+        public async Task<ActionResult<AuthenticationResponse>> Authenticate(
             [FromBody] AuthenticationRequest request,
             CancellationToken token)
         {
@@ -40,9 +41,15 @@ namespace Stoady.Controllers
                 request.Email,
                 request.Password);
 
-            var result = await _mediator.Send(command, token);
-
-            return result;
+            try
+            {
+                var result = await _mediator.Send(command, token);
+                return Ok(result);
+            }
+            catch (ApplicationException)
+            {
+                return Unauthorized();
+            }
         }
     }
 }

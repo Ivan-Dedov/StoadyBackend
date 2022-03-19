@@ -13,10 +13,12 @@ using Stoady.Handlers.Team.GetTeamInfo;
 using Stoady.Handlers.Team.GetTeamMembers;
 using Stoady.Handlers.Team.GetUserTeams;
 using Stoady.Handlers.Team.RemoveMember;
+using Stoady.Handlers.Team.SelectTeam;
 using Stoady.Models;
 using Stoady.Models.Handlers.Team.GetTeamInfo;
 using Stoady.Models.Handlers.Team.GetTeamMembers;
 using Stoady.Models.Handlers.Team.GetUserTeams;
+using Stoady.Models.Handlers.Team.SelectTeam;
 
 namespace Stoady.Controllers
 {
@@ -47,6 +49,18 @@ namespace Stoady.Controllers
             CancellationToken token)
         {
             var command = new GetUserTeamsCommand(userId);
+
+            var result = await _mediator.Send(command, token);
+
+            return result;
+        }
+
+        [HttpPost("{teamId:long:min(1)}/select")]
+        public async Task<SelectTeamResponse> SelectTeam(
+            long teamId,
+            CancellationToken token)
+        {
+            var command = new SelectTeamCommand(teamId);
 
             var result = await _mediator.Send(command, token);
 
