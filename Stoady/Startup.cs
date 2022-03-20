@@ -1,9 +1,11 @@
 using System;
 using System.IO;
 using System.Reflection;
+using System.Text;
 
 using MediatR;
 
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
@@ -12,9 +14,15 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 using Stoady.DataAccess.DataContexts;
+using Stoady.Helpers;
+using Stoady.Services;
+using Stoady.Services.Interfaces;
+using Stoady.Validators;
+using Stoady.Validators.Interfaces;
 
 namespace Stoady
 {
@@ -48,6 +56,26 @@ namespace Stoady
                 c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
             });
 
+            // JWT авторизация
+            var key = Encoding.ASCII.GetBytes(AuthorizationOptions.Secret);
+            services.AddAuthentication(x =>
+                {
+                    x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
+                .AddJwtBearer(x =>
+                {
+                    x.RequireHttpsMetadata = true;
+                    x.SaveToken = true;
+                    x.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(key),
+                        ValidateIssuer = false,
+                        ValidateAudience = false
+                    };
+                });
+
             // Контекст БД Stoady
             services.AddDbContext<StoadyDataContext>(
                 options => options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"),
@@ -56,6 +84,15 @@ namespace Stoady
 
             // Dependency Injection
             services.AddMediatR(typeof(Startup));
+
+            // Services
+            services.AddTransient<ITokenService, TokenService>();
+            services.AddTransient<IClaimService, ClaimService>();
+
+            // Validators
+            services.AddTransient<ITeamValidator, TeamValidator>();
+            services.AddTransient<IUserValidator, UserValidator>();
+            services.AddTransient<IUserTeamValidator, UserTeamValidator>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -63,15 +100,21 @@ namespace Stoady
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseSwagger();
-                app.UseSwaggerUI(c =>
-                    c.SwaggerEndpoint($"/swagger/{ApplicationVersion}/swagger.json", ApplicationName));
             }
+            else
+            {
+                app.UseHsts();
+            }
+
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+                c.SwaggerEndpoint($"/swagger/{ApplicationVersion}/swagger.json", ApplicationName));
 
             app.UseHttpsRedirection();
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             // Делаем отображение ошибок как JSON
@@ -87,7 +130,7 @@ namespace Stoady
                             new
                             {
                                 source = exception?.Source,
-                                error = exception?.Message,
+                                message = exception?.Message,
                                 stackTrace = exception?.StackTrace
                             };
 
