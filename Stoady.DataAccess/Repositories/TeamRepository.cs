@@ -31,6 +31,22 @@ namespace Stoady.DataAccess.Repositories
                 new { id });
         }
 
+        public async Task<TeamDao> GetTeamByName(
+            string name,
+            CancellationToken ct)
+        {
+            await using var dbConnection = new NpgsqlConnection(ConnectionString);
+            return await dbConnection.QueryFirstOrDefaultAsync<TeamDao>(
+                @"SELECT
+                    t.id as Id,
+                    t.name as Name,
+                    t.avatar as Avatar
+                    FROM teams t
+                    WHERE name = @name
+                    ORDER BY t.id DESC",
+                new { name });
+        }
+
         public async Task<IEnumerable<UserDao>> GetTeamMembersByTeamId(
             long teamId,
             CancellationToken ct)

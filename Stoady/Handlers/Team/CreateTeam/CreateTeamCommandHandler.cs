@@ -26,8 +26,7 @@ namespace Stoady.Handlers.Team.CreateTeam
 
         public CreateTeamCommandHandler(
             ILogger<CreateTeamCommandHandler> logger,
-            ITeamRepository teamRepository,
-            IRoleRepository roleRepository)
+            ITeamRepository teamRepository)
         {
             _logger = logger;
             _teamRepository = teamRepository;
@@ -51,7 +50,7 @@ namespace Stoady.Handlers.Team.CreateTeam
                 new AddMemberParameters
                 {
                     RoleId = (long)Role.Creator,
-                    TeamId = /*todo how to determine ID*/0,
+                    TeamId = (await _teamRepository.GetTeamByName(teamName, ct)).Id,
                     UserId = userId
                 },
                 ct);

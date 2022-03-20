@@ -13,6 +13,10 @@ namespace Stoady.DataAccess.Repositories.Interfaces
             long id,
             CancellationToken ct);
 
+        Task<TeamDao> GetTeamByName(
+            string name,
+            CancellationToken ct);
+
         Task<IEnumerable<UserDao>> GetTeamMembersByTeamId(
             long teamId,
             CancellationToken ct);
