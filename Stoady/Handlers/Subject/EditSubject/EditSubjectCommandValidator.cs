@@ -10,16 +10,10 @@ namespace Stoady.Handlers.Subject.EditSubject
         private const int MinDescriptionLength = 0;
         private const int MaxDescriptionLength = 250;
 
-        private const int MinImageLength = 0;
-        private const int MaxImageLength = 100;
-
         public EditSubjectCommandValidator()
         {
             RuleFor(x => x.SubjectName)
                 .Length(MinNameLength, MaxNameLength);
-
-            RuleFor(x => x.SubjectPicture)
-                .Length(MinImageLength, MaxImageLength);
 
             RuleFor(x => x.SubjectDescription)
                 .Length(MinDescriptionLength, MaxDescriptionLength);

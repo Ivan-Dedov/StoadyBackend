@@ -62,7 +62,6 @@ namespace Stoady.Controllers
             var command = new AddSubjectCommand(
                 request.TeamId,
                 request.SubjectName,
-                request.SubjectPicture,
                 request.SubjectDescription);
 
             await _mediator.Send(command, token);
@@ -84,9 +83,8 @@ namespace Stoady.Controllers
             CancellationToken token)
         {
             var command = new EditSubjectCommand(
-                request.SubjectId,
+                subjectId,
                 request.SubjectName,
-                request.SubjectPicture,
                 request.SubjectDescription);
 
             await _mediator.Send(command, token);

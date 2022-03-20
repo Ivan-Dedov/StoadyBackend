@@ -103,9 +103,9 @@ namespace Stoady.DataAccess.Repositories
                     t.name as Name,
                     t.avatar as Avatar
                     FROM teamUsers tu
-                    LEFT JOIN teams t ON tu.userId = t.id
-                    WHERE t.id = @id",
-                new { id = userId });
+                    LEFT JOIN teams t ON tu.teamId = t.id
+                    WHERE tu.userId = @userId",
+                new { userId });
         }
     }
 }

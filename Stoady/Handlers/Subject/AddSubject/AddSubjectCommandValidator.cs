@@ -10,9 +10,6 @@ namespace Stoady.Handlers.Subject.AddSubject
         private const int MinDescriptionLength = 0;
         private const int MaxDescriptionLength = 250;
 
-        private const int MinImageLength = 0;
-        private const int MaxImageLength = 100;
-
         public AddSubjectCommandValidator()
         {
             RuleFor(x => x.TeamId)
@@ -20,9 +17,6 @@ namespace Stoady.Handlers.Subject.AddSubject
 
             RuleFor(x => x.SubjectName)
                 .Length(MinNameLength, MaxNameLength);
-
-            RuleFor(x => x.SubjectPicture)
-                .Length(MinImageLength, MaxImageLength);
 
             RuleFor(x => x.SubjectDescription)
                 .Length(MinDescriptionLength, MaxDescriptionLength);

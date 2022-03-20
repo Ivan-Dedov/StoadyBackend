@@ -34,7 +34,7 @@ namespace Stoady.Controllers
         /// <param name="userId">ID пользователя</param>
         /// <param name="token"></param>
         /// <returns></returns>
-        [HttpGet]
+        [HttpGet("teams")]
         public async Task<GetUserTeamsResponse> GetUserTeams(
             [FromQuery] long userId,
             CancellationToken token)

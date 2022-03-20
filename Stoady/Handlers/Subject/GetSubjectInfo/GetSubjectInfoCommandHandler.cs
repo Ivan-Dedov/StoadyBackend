@@ -49,7 +49,6 @@ namespace Stoady.Handlers.Subject.GetSubjectInfo
             return new GetSubjectInfoResponse
             {
                 Name = subject.Title,
-                Picture = subject.Image,
                 Description = subject.Description,
                 Topics = topics.Select(x =>
                         new TopicInSubject

@@ -13,7 +13,6 @@ namespace Stoady.Handlers.Subject.AddSubject
     public sealed record AddSubjectCommand(
             long TeamId,
             string SubjectName,
-            string SubjectPicture,
             string SubjectDescription)
         : IRequest<Unit>;
 
@@ -35,7 +34,7 @@ namespace Stoady.Handlers.Subject.AddSubject
             AddSubjectCommand request,
             CancellationToken ct)
         {
-            var (teamId, subjectName, subjectPicture, subjectDescription) = request;
+            var (teamId, subjectName, subjectDescription) = request;
 
             await _subjectRepository.AddSubject(
                 new AddSubjectParameters
@@ -43,7 +42,6 @@ namespace Stoady.Handlers.Subject.AddSubject
                     TeamId = teamId,
                     SubjectName = subjectName,
                     SubjectDescription = subjectDescription,
-                    SubjectPicture = subjectPicture
                 },
                 ct);
 

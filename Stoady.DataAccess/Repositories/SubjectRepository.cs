@@ -25,7 +25,6 @@ namespace Stoady.DataAccess.Repositories
                 @"SELECT
                     s.id as Id,
                     s.title as Title,
-                    s.image as Image,
                     s.description as Description,
                     s.teamId as TeamId
                     FROM subjects s
@@ -42,7 +41,6 @@ namespace Stoady.DataAccess.Repositories
                 @"SELECT
                     s.id as Id,
                     s.title as Title,
-                    s.image as Image,
                     s.description as Description,
                     s.teamId as TeamId
                     FROM subjects s
@@ -57,12 +55,11 @@ namespace Stoady.DataAccess.Repositories
             await using var dbConnection = new NpgsqlConnection(ConnectionString);
             return await dbConnection.ExecuteAsync(
                 @"INSERT INTO subjects
-                (title, description, image, teamId) VALUES 
-                (@title, @description, @image, @teamId)",
+                (title, description, teamId) VALUES 
+                (@title, @description, @teamId)",
                 new
                 {
                     title = parameters.SubjectName,
-                    image = parameters.SubjectPicture,
                     description = parameters.SubjectDescription,
                     teamId = parameters.TeamId
                 });
@@ -76,14 +73,12 @@ namespace Stoady.DataAccess.Repositories
             return await dbConnection.ExecuteAsync(
                 @"UPDATE subjects
                 SET title = @title,
-                    image = @image, 
                     description = @description  
                 WHERE id = @id",
                 new
                 {
                     title = parameters.SubjectName,
                     description = parameters.SubjectDescription,
-                    image = parameters.SubjectPicture,
                     id = parameters.SubjectId
                 });
         }

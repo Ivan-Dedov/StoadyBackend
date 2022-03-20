@@ -13,7 +13,6 @@ namespace Stoady.Handlers.Subject.EditSubject
     public sealed record EditSubjectCommand(
             long SubjectId,
             string SubjectName,
-            string SubjectPicture,
             string SubjectDescription)
         : IRequest<Unit>;
 
@@ -35,14 +34,13 @@ namespace Stoady.Handlers.Subject.EditSubject
             EditSubjectCommand request,
             CancellationToken ct)
         {
-            var (subjectId, subjectName, subjectPicture, subjectDescription) = request;
+            var (subjectId, subjectName, subjectDescription) = request;
 
             await _subjectRepository.EditSubject(
                 new EditSubjectParameters
                 {
                     SubjectId = subjectId,
                     SubjectName = subjectName,
-                    SubjectPicture = subjectPicture,
                     SubjectDescription = subjectDescription
                 },
                 ct);

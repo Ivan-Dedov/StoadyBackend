@@ -129,7 +129,7 @@ namespace Stoady.DataAccess.Repositories
                 WHERE id = @id",
                 new
                 {
-                    teamId = parameters.TeamId,
+                    id = parameters.TeamId,
                     avatar = parameters.TeamAvatar
                 });
         }

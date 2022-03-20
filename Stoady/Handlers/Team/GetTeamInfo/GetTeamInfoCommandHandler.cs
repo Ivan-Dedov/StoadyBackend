@@ -55,7 +55,6 @@ namespace Stoady.Handlers.Team.GetTeamInfo
                         {
                             Id = x.Id,
                             Name = x.Title,
-                            Image = x.Image,
                             Description = x.Description
                         })
                     .ToList()

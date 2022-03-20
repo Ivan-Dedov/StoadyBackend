@@ -60,8 +60,8 @@ namespace Stoady.DataAccess.Repositories
                 (@questionText, @answerText, @topicId)",
                 new
                 {
-                    question = parameters.QuestionText,
-                    answer = parameters.AnswerText,
+                    questionText = parameters.QuestionText,
+                    answerText = parameters.AnswerText,
                     topicId = parameters.TopicId
                 });
         }
@@ -78,8 +78,8 @@ namespace Stoady.DataAccess.Repositories
                 WHERE id = @id",
                 new
                 {
-                    question = parameters.QuestionText,
-                    answer = parameters.AnswerText,
+                    questionText = parameters.QuestionText,
+                    answerText = parameters.AnswerText,
                     id = parameters.QuestionId
                 });
         }

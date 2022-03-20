@@ -6,8 +6,6 @@ namespace Stoady.Models.Handlers.Subject.GetSubjectInfo
     {
         public string Name { get; init; }
 
-        public string Picture { get; init; }
-
         public string Description { get; init; }
 
         public List<TopicInSubject> Topics { get; init; }
