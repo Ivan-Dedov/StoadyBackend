@@ -2,8 +2,10 @@ namespace Stoady.Models
 {
     public enum Role
     {
-        Member,
-        Admin,
-        Creator
+        Creator = 0,
+
+        Admin = 1,
+
+        Member = 2
     }
 }

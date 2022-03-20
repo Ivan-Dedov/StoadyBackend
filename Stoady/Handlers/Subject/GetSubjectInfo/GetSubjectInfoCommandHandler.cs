@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,45 +6,45 @@ using MediatR;
 
 using Microsoft.Extensions.Logging;
 
-using Stoady.DataAccess.DataContexts;
+using Stoady.DataAccess.Repositories.Interfaces;
 using Stoady.Models.Handlers.Subject.GetSubjectInfo;
 
 namespace Stoady.Handlers.Subject.GetSubjectInfo
 {
+    public sealed record GetSubjectInfoCommand(
+            long SubjectId)
+        : IRequest<GetSubjectInfoResponse>;
+
     public sealed class GetSubjectInfoCommandHandler
         : IRequestHandler<GetSubjectInfoCommand, GetSubjectInfoResponse>
     {
-        private readonly StoadyDataContext _context;
+        private readonly ISubjectRepository _subjectRepository;
+        private readonly ITopicRepository _topicRepository;
         private readonly ILogger<GetSubjectInfoCommandHandler> _logger;
 
         public GetSubjectInfoCommandHandler(
-            StoadyDataContext context,
-            ILogger<GetSubjectInfoCommandHandler> logger)
+            ILogger<GetSubjectInfoCommandHandler> logger,
+            ISubjectRepository subjectRepository,
+            ITopicRepository topicRepository)
         {
-            _context = context;
             _logger = logger;
+            _subjectRepository = subjectRepository;
+            _topicRepository = topicRepository;
         }
 
         public async Task<GetSubjectInfoResponse> Handle(
             GetSubjectInfoCommand request,
-            CancellationToken cancellationToken)
+            CancellationToken ct)
         {
             var subjectId = request.SubjectId;
 
-            var subjects = _context.Subjects
-                .Where(x => x.Id == subjectId);
+            var subjectTask = _subjectRepository.GetSubjectById(subjectId, ct);
+            var topicsTask = _topicRepository.GetTopicsBySubjectId(subjectId, ct);
 
-            if (subjects.Count() != 1)
-            {
-                var message = $"Could not find subject (ID = {subjectId})";
-                _logger.LogWarning(message);
-                throw new ApplicationException(message);
-            }
+            await Task.WhenAll(subjectTask, topicsTask);
 
-            var subject = subjects.First();
-
-            var topics = _context.Topics
-                .Where(x => x.SubjectId == subjectId);
+            var subject = subjectTask.Result;
+            var topics = topicsTask.Result;
 
             return new GetSubjectInfoResponse
             {
@@ -62,8 +61,4 @@ namespace Stoady.Handlers.Subject.GetSubjectInfo
             };
         }
     }
-
-    public sealed record GetSubjectInfoCommand(
-            long SubjectId)
-        : IRequest<GetSubjectInfoResponse>;
 }

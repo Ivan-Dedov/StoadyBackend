@@ -1,45 +1,42 @@
-using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 using MediatR;
 
-using Stoady.DataAccess.DataContexts;
+using Stoady.DataAccess.Repositories.Interfaces;
 using Stoady.Models.Handlers.Question.GetQuestions;
 
 namespace Stoady.Handlers.Question.GetQuestions
 {
+    public sealed record GetQuestionsCommand(
+            long TopicId)
+        : IRequest<GetQuestionsResponse>;
+
     public sealed class GetQuestionsCommandHandler
-    : IRequestHandler<GetQuestionsCommand, GetQuestionsResponse>
+        : IRequestHandler<GetQuestionsCommand, GetQuestionsResponse>
     {
-        private readonly StoadyDataContext _context;
+        private readonly IQuestionRepository _questionRepository;
 
         public GetQuestionsCommandHandler(
-            StoadyDataContext context)
+            IQuestionRepository questionRepository)
         {
-            _context = context;
+            _questionRepository = questionRepository;
         }
 
         public async Task<GetQuestionsResponse> Handle(
             GetQuestionsCommand request,
-            CancellationToken cancellationToken)
+            CancellationToken ct)
         {
             var topicId = request.TopicId;
 
-            if (_context.Topics.Count(x => x.Id == topicId) != 1)
-            {
-                var message = $"Could not find topic with ID = {topicId}";
-                throw new ApplicationException(message);
-            }
-
-            var questions = _context.Questions
-                .Where(q => q.TopicId == topicId)
+            var questions = (await _questionRepository
+                    .GetQuestionsByTopicId(topicId, ct))
                 .Select(q => new QuestionInTopic
                 {
                     Id = q.Id,
-                    AnswerText = q.AnswerText,
-                    QuestionText = q.QuestionText
+                    QuestionText = q.QuestionText,
+                    AnswerText = q.AnswerText
                 })
                 .ToList();
 
@@ -49,8 +46,4 @@ namespace Stoady.Handlers.Question.GetQuestions
             };
         }
     }
-
-    public sealed record GetQuestionsCommand(
-            long TopicId)
-        : IRequest<GetQuestionsResponse>;
 }

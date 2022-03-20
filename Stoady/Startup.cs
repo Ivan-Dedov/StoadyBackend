@@ -10,19 +10,17 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
-using Stoady.DataAccess.DataContexts;
+using Stoady.DataAccess.Repositories;
+using Stoady.DataAccess.Repositories.Interfaces;
 using Stoady.Helpers;
 using Stoady.Services;
 using Stoady.Services.Interfaces;
-using Stoady.Validators;
-using Stoady.Validators.Interfaces;
 
 namespace Stoady
 {
@@ -76,23 +74,22 @@ namespace Stoady
                     };
                 });
 
-            // Контекст БД Stoady
-            services.AddDbContext<StoadyDataContext>(
-                options => options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"),
-                    assembly => assembly.MigrationsAssembly("Stoady.DataAccess.Migrations"))
-            );
-
             // Dependency Injection
             services.AddMediatR(typeof(Startup));
 
             // Services
             services.AddTransient<ITokenService, TokenService>();
             services.AddTransient<IClaimService, ClaimService>();
+            services.AddScoped<IRightsValidatorService, RightsValidatorService>();
 
-            // Validators
-            services.AddTransient<ITeamValidator, TeamValidator>();
-            services.AddTransient<IUserValidator, UserValidator>();
-            services.AddTransient<IUserTeamValidator, UserTeamValidator>();
+            // Repositories
+            services.AddTransient<IQuestionRepository, QuestionRepository>();
+            services.AddTransient<IRoleRepository, RoleRepository>();
+            services.AddTransient<IStatisticsRepository, StatisticsRepository>();
+            services.AddTransient<ISubjectRepository, SubjectRepository>();
+            services.AddTransient<ITeamRepository, TeamRepository>();
+            services.AddTransient<ITopicRepository, TopicRepository>();
+            services.AddTransient<IUserRepository, UserRepository>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

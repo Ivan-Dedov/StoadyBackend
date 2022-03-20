@@ -1,6 +1,6 @@
 namespace Stoady.DataAccess.Models.Dao
 {
-    public sealed class UserQuestionDao : IDao
+    public sealed class UserQuestionDao
     {
         public long Id { get; init; }
 

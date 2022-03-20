@@ -1,46 +1,42 @@
-using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 using MediatR;
 
-using Stoady.DataAccess.DataContexts;
+using Stoady.DataAccess.Repositories.Interfaces;
 using Stoady.Models.Handlers.Statistics.GetUserStatistics;
 
 namespace Stoady.Handlers.Statistics.GetUserStatistics
 {
+    public sealed record GetUserStatisticsCommand(
+            long UserId)
+        : IRequest<GetUserStatisticsResponse>;
+
     public sealed class GetUserStatisticsCommandHandler
         : IRequestHandler<GetUserStatisticsCommand, GetUserStatisticsResponse>
     {
-        private readonly StoadyDataContext _context;
+        private readonly IStatisticsRepository _statisticsRepository;
 
         public GetUserStatisticsCommandHandler(
-            StoadyDataContext context)
+            IStatisticsRepository statisticsRepository)
         {
-            _context = context;
+            _statisticsRepository = statisticsRepository;
         }
 
         public async Task<GetUserStatisticsResponse> Handle(
             GetUserStatisticsCommand request,
-            CancellationToken cancellationToken)
+            CancellationToken ct)
         {
             var userId = request.UserId;
 
-            if (_context.Users.Count(x => x.Id == userId) != 1)
-            {
-                var message = $"Could not find user with ID = {userId}";
-                throw new ApplicationException(message);
-            }
-
-            var results = _context.Statistics
-                .Where(x => x.UserId == userId)
-                .Select(x =>
-                    new TopicStatistics
-                    {
-                        TopicId = x.TopicId,
-                        Result = x.Result
-                    })
+            var results = (await _statisticsRepository
+                    .GetStatisticsByUserId(userId, ct))
+                .Select(s => new TopicStatistics
+                {
+                    TopicId = s.TopicId,
+                    Result = s.Result
+                })
                 .ToList();
 
             return new GetUserStatisticsResponse
@@ -49,8 +45,4 @@ namespace Stoady.Handlers.Statistics.GetUserStatistics
             };
         }
     }
-
-    public sealed record GetUserStatisticsCommand(
-            long UserId)
-        : IRequest<GetUserStatisticsResponse>;
 }

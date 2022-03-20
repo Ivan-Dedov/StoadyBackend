@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -7,60 +6,57 @@ using MediatR;
 
 using Microsoft.Extensions.Logging;
 
-using Stoady.DataAccess.DataContexts;
-using Stoady.DataAccess.Models.Dao;
+using Stoady.DataAccess.Models.Parameters;
+using Stoady.DataAccess.Repositories.Interfaces;
 
 namespace Stoady.Handlers.Question.AddQuestion
 {
-    public sealed class AddQuestionCommandHandler
-        : IRequestHandler<AddQuestionCommand, Unit>
-    {
-        private readonly StoadyDataContext _context;
-        private readonly ILogger<AddQuestionCommandHandler> _logger;
-
-        public AddQuestionCommandHandler(
-            StoadyDataContext context,
-            ILogger<AddQuestionCommandHandler> logger)
-        {
-            _context = context;
-            _logger = logger;
-        }
-
-        public async Task<Unit> Handle(
-            AddQuestionCommand request,
-            CancellationToken cancellationToken)
-        {
-            var (topicId, questionText, answerText) = request;
-
-            if (_context.Topics.Count(x => x.Id == topicId) != 1)
-            {
-                var message = $"Could not find topic with ID = {topicId}";
-                throw new ApplicationException(message);
-            }
-
-            await _context.Questions.AddAsync(
-                new QuestionDao
-                {
-                    TopicId = topicId,
-                    QuestionText = questionText,
-                    AnswerText = answerText
-                },
-                cancellationToken);
-
-            if (await _context.SaveChangesAsync() != 1)
-            {
-                var message = $"Could not add question to topic with ID = {topicId}";
-                _logger.LogWarning(message);
-                throw new ApplicationException(message);
-            }
-
-            return Unit.Value;
-        }
-    }
-
     public sealed record AddQuestionCommand(
             long TopicId,
             string QuestionText,
             string AnswerText)
         : IRequest<Unit>;
+
+    public sealed class AddQuestionCommandHandler
+        : IRequestHandler<AddQuestionCommand, Unit>
+    {
+        private readonly ILogger<AddQuestionCommandHandler> _logger;
+        private readonly IQuestionRepository _questionRepository;
+        private readonly ITopicRepository _topicRepository;
+
+        public AddQuestionCommandHandler(
+            ILogger<AddQuestionCommandHandler> logger,
+            ITopicRepository topicRepository,
+            IQuestionRepository questionRepository)
+        {
+            _logger = logger;
+            _topicRepository = topicRepository;
+            _questionRepository = questionRepository;
+        }
+
+        public async Task<Unit> Handle(
+            AddQuestionCommand request,
+            CancellationToken ct)
+        {
+            var (topicId, questionText, answerText) = request;
+
+            if (_topicRepository.GetTopicById(topicId, ct) is null)
+            {
+                var message = $"Could not find topic with ID = {topicId}";
+                _logger.LogWarning(message);
+                throw new ApplicationException(message);
+            }
+
+            await _questionRepository.AddQuestion(
+                new AddQuestionParameters
+                {
+                    TopicId = topicId,
+                    AnswerText = answerText,
+                    QuestionText = questionText
+                },
+                ct);
+
+            return Unit.Value;
+        }
+    }
 }
