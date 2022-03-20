@@ -7,70 +7,61 @@ using MediatR;
 
 using Microsoft.Extensions.Logging;
 
-using Stoady.DataAccess.DataContexts;
+using Stoady.DataAccess.Repositories.Interfaces;
 using Stoady.Models;
 using Stoady.Models.Handlers.Team.GetTeamMembers;
 
 namespace Stoady.Handlers.Team.GetTeamMembers
 {
+    public sealed record GetTeamMembersCommand(
+            long TeamId)
+        : IRequest<GetTeamMembersResponse>;
+
     public sealed class GetTeamMembersCommandHandler
         : IRequestHandler<GetTeamMembersCommand, GetTeamMembersResponse>
     {
-        private readonly StoadyDataContext _context;
+        private readonly ITeamRepository _teamRepository;
+        private readonly IRoleRepository _roleRepository;
         private readonly ILogger<GetTeamMembersCommandHandler> _logger;
 
         public GetTeamMembersCommandHandler(
-            StoadyDataContext context,
-            ILogger<GetTeamMembersCommandHandler> logger)
+            ILogger<GetTeamMembersCommandHandler> logger,
+            ITeamRepository teamRepository,
+            IRoleRepository roleRepository)
         {
-            _context = context;
             _logger = logger;
+            _teamRepository = teamRepository;
+            _roleRepository = roleRepository;
         }
 
         public async Task<GetTeamMembersResponse> Handle(
             GetTeamMembersCommand request,
-            CancellationToken cancellationToken)
+            CancellationToken ct)
         {
             var teamId = request.TeamId;
 
-            var teams = _context.Teams
-                .Where(x => x.Id == teamId);
-            if (teams.Count() != 1)
-            {
-                var message = $"Could not find team with ID = {teamId}";
-                _logger.LogWarning(message);
-                throw new ApplicationException(message);
-            }
-
-            var users = _context.TeamUser
-                .Where(x => x.TeamId == teamId)
-                .Join(_context.Users,
-                    x => x.UserId,
-                    y => y.Id,
-                    (x, y) => new MemberInTeam
+            var usersInTeamTasks = (await _teamRepository
+                    .GetTeamMembersByTeamId(teamId, ct))
+                .Select(async x =>
+                    new MemberInTeam
                     {
-                        Id = y.Id,
-                        Username = y.Username,
-                        Email = y.Email,
-                        Role = Enum.Parse<Role>(_context.Roles.First(z => z.Id == x.RoleId).Name)
-                    });
+                        Id = x.Id,
+                        Username = x.Username,
+                        Email = x.Email,
+                        Role = Enum.Parse<Role>((await _roleRepository.GetUserRoleByTeamId(x.Id, teamId, ct)).Name)
+                    })
+                .ToList();
+
+            await Task.WhenAll(usersInTeamTasks);
+
+            var members = usersInTeamTasks
+                .Select(x => x.Result)
+                .ToList();
 
             return new GetTeamMembersResponse
             {
-                Members = users.Select(x =>
-                        new MemberInTeam
-                        {
-                            Id = x.Id,
-                            Username = x.Username,
-                            Email = x.Email,
-                            Role = x.Role
-                        })
-                    .ToList()
+                Members = members
             };
         }
     }
-
-    public sealed record GetTeamMembersCommand(
-            long TeamId)
-        : IRequest<GetTeamMembersResponse>;
 }

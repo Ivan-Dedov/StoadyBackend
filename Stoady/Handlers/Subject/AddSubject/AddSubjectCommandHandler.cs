@@ -1,5 +1,3 @@
-using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -7,62 +5,49 @@ using MediatR;
 
 using Microsoft.Extensions.Logging;
 
-using Stoady.DataAccess.DataContexts;
-using Stoady.DataAccess.Models.Dao;
+using Stoady.DataAccess.Models.Parameters;
+using Stoady.DataAccess.Repositories.Interfaces;
 
 namespace Stoady.Handlers.Subject.AddSubject
 {
-    public sealed class AddSubjectCommandHandler
-        : IRequestHandler<AddSubjectCommand, Unit>
-    {
-        private readonly StoadyDataContext _context;
-        private readonly ILogger<AddSubjectCommandHandler> _logger;
-
-        public AddSubjectCommandHandler(
-            StoadyDataContext context,
-            ILogger<AddSubjectCommandHandler> logger)
-        {
-            _context = context;
-            _logger = logger;
-        }
-
-        public async Task<Unit> Handle(
-            AddSubjectCommand request,
-            CancellationToken cancellationToken)
-        {
-            var (teamId, subjectName, subjectPicture, subjectDescription) = request;
-
-            if (_context.Teams.Count(x => x.Id == teamId) != 1)
-            {
-                var message = $"Could not find team with ID = {teamId}";
-                throw new ApplicationException(message);
-            }
-
-            await _context.Subjects.AddAsync(
-                new SubjectDao
-                {
-                    TeamId = teamId,
-                    Title = subjectName,
-                    Image = subjectPicture,
-                    Description = subjectDescription
-                },
-                cancellationToken);
-
-            if (await _context.SaveChangesAsync() != 1)
-            {
-                var message = $"Could not add subject to team with ID = {teamId}";
-                _logger.LogWarning(message);
-                throw new ApplicationException(message);
-            }
-
-            return Unit.Value;
-        }
-    }
-
     public sealed record AddSubjectCommand(
             long TeamId,
             string SubjectName,
             string SubjectPicture,
             string SubjectDescription)
         : IRequest<Unit>;
+
+    public sealed class AddSubjectCommandHandler
+        : IRequestHandler<AddSubjectCommand, Unit>
+    {
+        private readonly ISubjectRepository _subjectRepository;
+        private readonly ILogger<AddSubjectCommandHandler> _logger;
+
+        public AddSubjectCommandHandler(
+            ILogger<AddSubjectCommandHandler> logger,
+            ISubjectRepository subjectRepository)
+        {
+            _logger = logger;
+            _subjectRepository = subjectRepository;
+        }
+
+        public async Task<Unit> Handle(
+            AddSubjectCommand request,
+            CancellationToken ct)
+        {
+            var (teamId, subjectName, subjectPicture, subjectDescription) = request;
+
+            await _subjectRepository.AddSubject(
+                new AddSubjectParameters
+                {
+                    TeamId = teamId,
+                    SubjectName = subjectName,
+                    SubjectDescription = subjectDescription,
+                    SubjectPicture = subjectPicture
+                },
+                ct);
+
+            return Unit.Value;
+        }
+    }
 }

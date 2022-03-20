@@ -1,5 +1,3 @@
-using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -7,67 +5,58 @@ using MediatR;
 
 using Microsoft.Extensions.Logging;
 
-using Stoady.DataAccess.DataContexts;
-using Stoady.DataAccess.Models.Dao;
-
-using Role = Stoady.Models.Role;
+using Stoady.DataAccess.Models.Parameters;
+using Stoady.DataAccess.Repositories.Interfaces;
+using Stoady.Models;
 
 namespace Stoady.Handlers.Team.CreateTeam
 {
+    public sealed record CreateTeamCommand(
+            long UserId,
+            string TeamName)
+        : IRequest<Unit>;
+
     public sealed class CreateTeamCommandHandler
         : IRequestHandler<CreateTeamCommand, Unit>
     {
         private const string DefaultTeamAvatar = "";
 
-        private readonly StoadyDataContext _context;
+        private readonly ITeamRepository _teamRepository;
         private readonly ILogger<CreateTeamCommandHandler> _logger;
 
         public CreateTeamCommandHandler(
-            StoadyDataContext context,
-            ILogger<CreateTeamCommandHandler> logger)
+            ILogger<CreateTeamCommandHandler> logger,
+            ITeamRepository teamRepository,
+            IRoleRepository roleRepository)
         {
-            _context = context;
             _logger = logger;
+            _teamRepository = teamRepository;
         }
 
         public async Task<Unit> Handle(
             CreateTeamCommand request,
-            CancellationToken cancellationToken)
+            CancellationToken ct)
         {
             var (userId, teamName) = request;
 
-            var newTeam = new TeamDao
-            {
-                Name = teamName,
-                Avatar = DefaultTeamAvatar,
-            };
-
-            await _context.Teams.AddAsync(
-                newTeam,
-                cancellationToken);
-
-            await _context.TeamUser.AddAsync(
-                new TeamUserDao
+            await _teamRepository.CreateTeam(
+                new CreateTeamParameters
                 {
-                    TeamId = newTeam.Id,
-                    UserId = userId,
-                    RoleId = _context.Roles.First(x => x.Name == Role.Creator.ToString()).Id
+                    TeamName = teamName,
+                    Avatar = DefaultTeamAvatar
                 },
-                cancellationToken);
+                ct);
 
-            if (await _context.SaveChangesAsync() != 2)
-            {
-                var message = $"Could not create team for user with ID = {userId}";
-                _logger.LogWarning(message);
-                throw new ApplicationException(message);
-            }
+            await _teamRepository.AddMember(
+                new AddMemberParameters
+                {
+                    RoleId = (long)Role.Creator,
+                    TeamId = /*todo how to determine ID*/0,
+                    UserId = userId
+                },
+                ct);
 
             return Unit.Value;
         }
     }
-
-    public sealed record CreateTeamCommand(
-            long UserId,
-            string TeamName)
-        : IRequest<Unit>;
 }

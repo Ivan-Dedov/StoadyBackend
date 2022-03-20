@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Stoady.Models.Handlers.Team.GetUserTeams
+namespace Stoady.Models.Handlers.User.GetUserTeams
 {
     public sealed class GetUserTeamsResponse
     {

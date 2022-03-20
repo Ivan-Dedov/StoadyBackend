@@ -1,5 +1,3 @@
-using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -7,55 +5,37 @@ using MediatR;
 
 using Microsoft.Extensions.Logging;
 
-using Stoady.DataAccess.DataContexts;
+using Stoady.DataAccess.Repositories.Interfaces;
 
 namespace Stoady.Handlers.Subject.RemoveSubject
 {
+    public sealed record RemoveSubjectCommand(
+            long SubjectId)
+        : IRequest<Unit>;
+
     public sealed class RemoveSubjectCommandHandler
     : IRequestHandler<RemoveSubjectCommand, Unit>
     {
-        private readonly StoadyDataContext _context;
+        private readonly ISubjectRepository _subjectRepository;
         private readonly ILogger<RemoveSubjectCommandHandler> _logger;
 
         public RemoveSubjectCommandHandler(
-            StoadyDataContext context,
-            ILogger<RemoveSubjectCommandHandler> logger)
+            ILogger<RemoveSubjectCommandHandler> logger,
+            ISubjectRepository subjectRepository)
         {
-            _context = context;
             _logger = logger;
+            _subjectRepository = subjectRepository;
         }
 
         public async Task<Unit> Handle(
             RemoveSubjectCommand request,
-            CancellationToken cancellationToken)
+            CancellationToken ct)
         {
             var subjectId = request.SubjectId;
 
-            var subjects = _context.Questions
-                .Where(x => x.Id == subjectId);
-
-            if (subjects.Count() != 1)
-            {
-                var message = $"Could not find subject (ID = {subjectId})";
-                _logger.LogWarning(message);
-                throw new ApplicationException(message);
-            }
-
-            var subject = subjects.First();
-            _context.Questions.Remove(subject);
-
-            if (await _context.SaveChangesAsync() != 1)
-            {
-                var message = $"Could not delete subject (ID = {subjectId})";
-                _logger.LogWarning(message);
-                throw new ApplicationException(message);
-            }
+            await _subjectRepository.RemoveSubject(subjectId, ct);
 
             return Unit.Value;
         }
     }
-
-    public sealed record RemoveSubjectCommand(
-            long SubjectId)
-        : IRequest<Unit>;
 }

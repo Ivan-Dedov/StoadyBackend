@@ -11,13 +11,11 @@ using Stoady.Handlers.Team.ChangeTeamAvatar;
 using Stoady.Handlers.Team.CreateTeam;
 using Stoady.Handlers.Team.GetTeamInfo;
 using Stoady.Handlers.Team.GetTeamMembers;
-using Stoady.Handlers.Team.GetUserTeams;
 using Stoady.Handlers.Team.RemoveMember;
 using Stoady.Handlers.Team.SelectTeam;
 using Stoady.Models;
 using Stoady.Models.Handlers.Team.GetTeamInfo;
 using Stoady.Models.Handlers.Team.GetTeamMembers;
-using Stoady.Models.Handlers.Team.GetUserTeams;
 using Stoady.Models.Handlers.Team.SelectTeam;
 
 namespace Stoady.Controllers
@@ -37,30 +35,13 @@ namespace Stoady.Controllers
             _mediator = mediator;
         }
 
-        /// <summary>
-        /// Получить команды, в которых состоит пользователь
-        /// </summary>
-        /// <param name="userId">ID пользователя</param>
-        /// <param name="token"></param>
-        /// <returns></returns>
-        [HttpGet]
-        public async Task<GetUserTeamsResponse> GetUserTeams(
-            [FromQuery] long userId,
-            CancellationToken token)
-        {
-            var command = new GetUserTeamsCommand(userId);
-
-            var result = await _mediator.Send(command, token);
-
-            return result;
-        }
-
         [HttpPost("{teamId:long:min(1)}/select")]
         public async Task<SelectTeamResponse> SelectTeam(
             long teamId,
+            [FromHeader] long userId,
             CancellationToken token)
         {
-            var command = new SelectTeamCommand(teamId);
+            var command = new SelectTeamCommand(userId, teamId);
 
             var result = await _mediator.Send(command, token);
 

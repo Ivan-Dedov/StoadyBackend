@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,44 +6,45 @@ using MediatR;
 
 using Microsoft.Extensions.Logging;
 
-using Stoady.DataAccess.DataContexts;
+using Stoady.DataAccess.Repositories.Interfaces;
 using Stoady.Models.Handlers.Team.GetTeamInfo;
 
 namespace Stoady.Handlers.Team.GetTeamInfo
 {
+    public sealed record GetTeamInfoCommand(
+            long TeamId)
+        : IRequest<GetTeamInfoResponse>;
+
     public sealed class GetTeamInfoCommandHandler
         : IRequestHandler<GetTeamInfoCommand, GetTeamInfoResponse>
     {
-        private readonly StoadyDataContext _context;
+        private readonly ITeamRepository _teamRepository;
+        private readonly ISubjectRepository _subjectRepository;
         private readonly ILogger<GetTeamInfoCommandHandler> _logger;
 
         public GetTeamInfoCommandHandler(
-            StoadyDataContext context,
-            ILogger<GetTeamInfoCommandHandler> logger)
+            ILogger<GetTeamInfoCommandHandler> logger,
+            ITeamRepository teamRepository,
+            ISubjectRepository subjectRepository)
         {
-            _context = context;
             _logger = logger;
+            _teamRepository = teamRepository;
+            _subjectRepository = subjectRepository;
         }
 
         public async Task<GetTeamInfoResponse> Handle(
             GetTeamInfoCommand request,
-            CancellationToken cancellationToken)
+            CancellationToken ct)
         {
             var teamId = request.TeamId;
 
-            var teams = _context.Teams
-                .Where(x => x.Id == teamId);
-            if (teams.Count() != 1)
-            {
-                var message = $"Could not find team with ID = {teamId}";
-                _logger.LogWarning(message);
-                throw new ApplicationException(message);
-            }
+            var teamTask = _teamRepository.GetTeamById(teamId, ct);
+            var subjectsTask = _subjectRepository.GetSubjectsByTeamId(teamId, ct);
 
-            var team = teams.First();
+            await Task.WhenAll(teamTask, subjectsTask);
 
-            var subjects = _context.Subjects
-                .Where(x => x.TeamId == teamId);
+            var team = teamTask.Result;
+            var subjects = subjectsTask.Result;
 
             return new GetTeamInfoResponse
             {
@@ -62,8 +62,4 @@ namespace Stoady.Handlers.Team.GetTeamInfo
             };
         }
     }
-
-    public sealed record GetTeamInfoCommand(
-            long TeamId)
-        : IRequest<GetTeamInfoResponse>;
 }

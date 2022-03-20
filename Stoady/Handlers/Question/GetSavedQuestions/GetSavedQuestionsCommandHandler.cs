@@ -4,42 +4,42 @@ using System.Threading.Tasks;
 
 using MediatR;
 
-using Stoady.DataAccess.DataContexts;
+using Stoady.DataAccess.Repositories.Interfaces;
 using Stoady.Models.Handlers.Question.GetSavedQuestions;
 
 namespace Stoady.Handlers.Question.GetSavedQuestions
 {
+    public sealed record GetSavedQuestionsCommand(
+            long UserId)
+        : IRequest<GetSavedQuestionsResponse>;
+
     public sealed class GetSavedQuestionsCommandHandler
         : IRequestHandler<GetSavedQuestionsCommand, GetSavedQuestionsResponse>
     {
-        private readonly StoadyDataContext _context;
+        private readonly IQuestionRepository _questionRepository;
 
         public GetSavedQuestionsCommandHandler(
-            StoadyDataContext context)
+            IQuestionRepository questionRepository)
         {
-            _context = context;
+            _questionRepository = questionRepository;
         }
 
         public async Task<GetSavedQuestionsResponse> Handle(
             GetSavedQuestionsCommand request,
-            CancellationToken cancellationToken)
+            CancellationToken ct)
         {
             var userId = request.UserId;
 
-            var savedQuestions = _context.UserQuestions
-                .Where(x => x.UserId == userId)
-                .Join(
-                    _context.Questions,
-                    x => x.QuestionId,
-                    y => y.Id,
-                    (x, y) =>
-                        new SavedQuestion
-                        {
-                            Id = x.QuestionId,
-                            QuestionText = y.QuestionText,
-                            AnswerText = y.AnswerText,
-                            TopicId = y.TopicId
-                        })
+            var savedQuestions = (await _questionRepository
+                    .GetSavedQuestions(userId, ct))
+                .Select(q =>
+                    new SavedQuestion
+                    {
+                        Id = q.Id,
+                        QuestionText = q.QuestionText,
+                        AnswerText = q.AnswerText,
+                        TopicId = q.TopicId
+                    })
                 .ToList();
 
             return new GetSavedQuestionsResponse
@@ -49,8 +49,4 @@ namespace Stoady.Handlers.Question.GetSavedQuestions
             };
         }
     }
-
-    public sealed record GetSavedQuestionsCommand(
-            long UserId)
-        : IRequest<GetSavedQuestionsResponse>;
 }

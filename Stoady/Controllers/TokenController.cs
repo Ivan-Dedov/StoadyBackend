@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-using Stoady.DataAccess.DataContexts;
 using Stoady.Models;
 using Stoady.Services.Interfaces;
 
@@ -19,14 +18,11 @@ namespace Stoady.Controllers
     [ApiController]
     public sealed class TokenController : ControllerBase
     {
-        private readonly StoadyDataContext _context;
         private readonly ITokenService _tokenService;
 
         public TokenController(
-            StoadyDataContext context,
             ITokenService tokenService)
         {
-            _context = context;
             _tokenService = tokenService;
         }
 
@@ -40,7 +36,7 @@ namespace Stoady.Controllers
         public async Task<IActionResult> Refresh(
             TokenModel token,
             CancellationToken cancellationToken)
-        {
+        {/*todo
             if (token is null)
             {
                 return BadRequest("Invalid client request");
@@ -71,7 +67,8 @@ namespace Stoady.Controllers
             {
                 accessToken = newAccessToken,
                 refreshToken = newRefreshToken
-            });
+            });*/
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -83,7 +80,7 @@ namespace Stoady.Controllers
         [HttpPost("revoke")]
         public async Task<IActionResult> Revoke(
             CancellationToken cancellationToken)
-        {
+        {/*todo
             var username = User.Identity?.Name;
             var user = _context.Users.SingleOrDefault(x => x.Username == username);
             if (user == null)
@@ -97,7 +94,8 @@ namespace Stoady.Controllers
                 throw new ApplicationException("Failed to revoke");
             }
 
-            return Ok();
+            return Ok();*/
+            throw new NotImplementedException();
         }
     }
 }

@@ -1,5 +1,3 @@
-using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -7,55 +5,37 @@ using MediatR;
 
 using Microsoft.Extensions.Logging;
 
-using Stoady.DataAccess.DataContexts;
+using Stoady.DataAccess.Repositories.Interfaces;
 
 namespace Stoady.Handlers.Topic.RemoveTopic
 {
+    public sealed record RemoveTopicCommand(
+            long TopicId)
+        : IRequest<Unit>;
+
     public sealed class RemoveTopicCommandHandler
-    : IRequestHandler<RemoveTopicCommand, Unit>
+        : IRequestHandler<RemoveTopicCommand, Unit>
     {
-        private readonly StoadyDataContext _context;
+        private readonly ITopicRepository _topicRepository;
         private readonly ILogger<RemoveTopicCommandHandler> _logger;
 
         public RemoveTopicCommandHandler(
-            StoadyDataContext context,
-            ILogger<RemoveTopicCommandHandler> logger)
+            ILogger<RemoveTopicCommandHandler> logger,
+            ITopicRepository topicRepository)
         {
-            _context = context;
             _logger = logger;
+            _topicRepository = topicRepository;
         }
 
         public async Task<Unit> Handle(
             RemoveTopicCommand request,
-            CancellationToken cancellationToken)
+            CancellationToken ct)
         {
             var topicId = request.TopicId;
 
-            var topics = _context.Topics
-                .Where(x => x.Id == topicId);
-
-            if (topics.Count() != 1)
-            {
-                var message = $"Could not find topic (ID = {topicId})";
-                _logger.LogWarning(message);
-                throw new ApplicationException(message);
-            }
-
-            var topic = topics.First();
-            _context.Topics.Remove(topic);
-
-            if (await _context.SaveChangesAsync() != 1)
-            {
-                var message = $"Could not delete subject (ID = {topicId})";
-                _logger.LogWarning(message);
-                throw new ApplicationException(message);
-            }
+            await _topicRepository.RemoveTopic(topicId, ct);
 
             return Unit.Value;
         }
     }
-
-    public sealed record RemoveTopicCommand(
-            long TopicId)
-        : IRequest<Unit>;
 }

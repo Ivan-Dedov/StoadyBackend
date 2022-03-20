@@ -9,7 +9,6 @@ WORKDIR /src
 COPY ["Stoady.sln", "./"]
 COPY ["/Stoady/Stoady.csproj", "./Stoady/"]
 COPY ["/Stoady.DataAccess/Stoady.DataAccess.csproj", "./Stoady.DataAccess/"]
-COPY ["/Stoady.DataAccess.Migrations/Stoady.DataAccess.Migrations.csproj", "./Stoady.DataAccess.Migrations/"]
 
 RUN dotnet restore "Stoady.sln"
 COPY . .

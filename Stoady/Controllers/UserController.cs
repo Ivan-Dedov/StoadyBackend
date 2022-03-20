@@ -5,8 +5,10 @@ using MediatR;
 
 using Microsoft.AspNetCore.Mvc;
 
+using Stoady.Handlers.User.GetUserTeams;
 using Stoady.Handlers.User.RegisterUser;
 using Stoady.Handlers.User.UpdateUserAvatar;
+using Stoady.Models.Handlers.User.GetUserTeams;
 using Stoady.Models.Handlers.User.RegisterUser;
 
 namespace Stoady.Controllers
@@ -24,6 +26,24 @@ namespace Stoady.Controllers
             IMediator mediator)
         {
             _mediator = mediator;
+        }
+
+        /// <summary>
+        /// Получить команды, в которых состоит пользователь
+        /// </summary>
+        /// <param name="userId">ID пользователя</param>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<GetUserTeamsResponse> GetUserTeams(
+            [FromQuery] long userId,
+            CancellationToken token)
+        {
+            var command = new GetUserTeamsCommand(userId);
+
+            var result = await _mediator.Send(command, token);
+
+            return result;
         }
 
         /// <summary>

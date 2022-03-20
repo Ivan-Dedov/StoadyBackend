@@ -2,7 +2,7 @@ using System;
 
 namespace Stoady.DataAccess.Models.Dao
 {
-    public sealed class UserDao : IDao
+    public sealed class UserDao
     {
         public long Id { get; init; }
 
@@ -14,8 +14,8 @@ namespace Stoady.DataAccess.Models.Dao
 
         public string Email { get; init; }
 
-        public string Password { get; set; }
+        public string Password { get; init; }
 
-        public int AvatarId { get; set; }
+        public int AvatarId { get; init; }
     }
 }
