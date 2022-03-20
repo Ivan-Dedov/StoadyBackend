@@ -7,6 +7,6 @@ services:
     image: stoady
     build:
       context: .
-      dockerfile: Stoady/Dockerfile
+      dockerfile: ./Dockerfile
     ports:
-      - 5000:5000
+      - 84:84

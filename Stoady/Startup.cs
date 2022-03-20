@@ -100,10 +100,15 @@ namespace Stoady
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseSwagger();
-                app.UseSwaggerUI(c =>
-                    c.SwaggerEndpoint($"/swagger/{ApplicationVersion}/swagger.json", ApplicationName));
             }
+            else
+            {
+                app.UseHsts();
+            }
+
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+                c.SwaggerEndpoint($"/swagger/{ApplicationVersion}/swagger.json", ApplicationName));
 
             app.UseHttpsRedirection();
 
@@ -125,7 +130,7 @@ namespace Stoady
                             new
                             {
                                 source = exception?.Source,
-                                error = exception?.Message,
+                                message = exception?.Message,
                                 stackTrace = exception?.StackTrace
                             };
 
