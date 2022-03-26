@@ -53,7 +53,7 @@ namespace Stoady.Handlers.Authentication.Authenticate
                 throw new ApplicationException(message);
             }
 
-            var claims = _claimService.GetClaims(user.Id, email);
+            var claims = _claimService.GetClaims(user.Id, user.Username);
 
             var token = _tokenService.GenerateToken(claims);
             var refreshToken = _tokenService.GenerateRefreshToken();

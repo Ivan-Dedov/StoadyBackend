@@ -36,8 +36,8 @@ namespace Stoady.Controllers
         public async Task<IActionResult> Refresh(
             TokenModel token,
             CancellationToken cancellationToken)
-        {/*todo
-            if (token is null)
+        {
+            /*if (token is null)
             {
                 return BadRequest("Invalid client request");
             }
@@ -80,8 +80,8 @@ namespace Stoady.Controllers
         [HttpPost("revoke")]
         public async Task<IActionResult> Revoke(
             CancellationToken cancellationToken)
-        {/*todo
-            var username = User.Identity?.Name;
+        {
+            /*var username = User.Identity?.Name;
             var user = _context.Users.SingleOrDefault(x => x.Username == username);
             if (user == null)
             {

@@ -7,7 +7,5 @@ namespace Stoady.Models.Handlers.Question.GetSavedQuestions
         public string QuestionText { get; init; }
 
         public string AnswerText { get; init; }
-
-        public long TopicId { get; init; }
     }
 }

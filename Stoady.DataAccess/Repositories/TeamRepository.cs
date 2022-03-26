@@ -25,7 +25,8 @@ namespace Stoady.DataAccess.Repositories
                 @"SELECT
                     t.id as Id,
                     t.name as Name,
-                    t.avatar as Avatar
+                    t.avatar as Avatar,
+                    t.creatorId as CreatorId
                     FROM teams t
                     WHERE id = @id",
                 new { id });
@@ -40,7 +41,8 @@ namespace Stoady.DataAccess.Repositories
                 @"SELECT
                     t.id as Id,
                     t.name as Name,
-                    t.avatar as Avatar
+                    t.avatar as Avatar,
+                    t.creatorId as CreatorId
                     FROM teams t
                     WHERE name = @name
                     ORDER BY t.id DESC",
@@ -74,12 +76,13 @@ namespace Stoady.DataAccess.Repositories
             await using var dbConnection = new NpgsqlConnection(ConnectionString);
             return await dbConnection.ExecuteAsync(
                 @"INSERT INTO teams
-                (name, avatar) VALUES 
-                (@name, @avatar)",
+                (name, avatar, creatorId) VALUES 
+                (@name, @avatar, @creatorId)",
                 new
                 {
                     name = parameters.TeamName,
-                    avatar = parameters.Avatar
+                    avatar = parameters.Avatar,
+                    creatorId = parameters.CreatorId
                 });
         }
 

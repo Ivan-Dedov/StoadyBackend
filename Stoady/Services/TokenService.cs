@@ -32,11 +32,9 @@ namespace Stoady.Services
         public string GenerateRefreshToken()
         {
             var randomArray = new byte[32];
-            using (var random = RandomNumberGenerator.Create())
-            {
-                random.GetBytes(randomArray);
-                return Convert.ToBase64String(randomArray);
-            }
+            using var random = RandomNumberGenerator.Create();
+            random.GetBytes(randomArray);
+            return Convert.ToBase64String(randomArray);
         }
 
         public ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
@@ -54,8 +52,9 @@ namespace Stoady.Services
             var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out var securityToken);
 
             if (securityToken is not JwtSecurityToken jwtSecurityToken
-                || !jwtSecurityToken.Header.Alg
-                    .Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+                || jwtSecurityToken.Header.Alg
+                        .Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase)
+                    is false)
             {
                 throw new SecurityTokenException("Invalid token");
             }

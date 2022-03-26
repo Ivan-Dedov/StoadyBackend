@@ -1,8 +1,6 @@
 using FluentValidation;
 
-using Stoady.Handlers.User.GetUserTeams;
-
-namespace Stoady.Handlers.Team.GetUserTeams
+namespace Stoady.Handlers.User.GetUserTeams
 {
     public class GetUserTeamsCommandValidator : AbstractValidator<GetUserTeamsCommand>
     {

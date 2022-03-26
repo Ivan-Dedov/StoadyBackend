@@ -38,7 +38,7 @@ namespace Stoady.Controllers
         [HttpPost("{teamId:long:min(1)}/select")]
         public async Task<SelectTeamResponse> SelectTeam(
             long teamId,
-            [FromHeader] long userId,
+            [FromQuery] long userId,
             CancellationToken token)
         {
             var command = new SelectTeamCommand(userId, teamId);
@@ -121,7 +121,7 @@ namespace Stoady.Controllers
         /// <returns></returns>
         [HttpPost("create")]
         public async Task<IActionResult> CreateTeam(
-            [FromHeader] long userId,
+            [FromQuery] long userId,
             [FromQuery] string teamName,
             CancellationToken token)
         {

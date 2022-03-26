@@ -25,9 +25,11 @@ namespace Stoady.DataAccess.Repositories
                 @"SELECT
                     s.id as Id,
                     s.topicId as TopicId,
+                    t.title as TopicName,
                     s.userId as UserId,
                     s.result as Result
                     FROM statistics s
+                    LEFT JOIN topics t ON t.Id = s.topicId
                     WHERE userId = @userId",
                 new { userId });
         }

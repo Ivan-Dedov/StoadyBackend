@@ -124,7 +124,7 @@ namespace Stoady.Controllers
         [HttpPut("save/{questionId:long:min(1)}")]
         public async Task<IActionResult> SaveQuestion(
             long questionId,
-            [FromQuery] long userId,
+            [FromHeader] long userId,
             CancellationToken token)
         {
             var command = new SaveQuestionCommand(
@@ -164,7 +164,7 @@ namespace Stoady.Controllers
         [HttpDelete("unsave/{questionId:long:min(1)}")]
         public async Task<IActionResult> RemoveSavedQuestion(
             long questionId,
-            [FromQuery] long userId,
+            [FromHeader] long userId,
             CancellationToken token)
         {
             var command = new RemoveSavedQuestionCommand(

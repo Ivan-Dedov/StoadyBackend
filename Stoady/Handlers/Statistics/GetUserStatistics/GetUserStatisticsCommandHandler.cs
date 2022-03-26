@@ -35,6 +35,7 @@ namespace Stoady.Handlers.Statistics.GetUserStatistics
                 .Select(s => new TopicStatistics
                 {
                     TopicId = s.TopicId,
+                    TopicName = s.TopicName,
                     Result = s.Result
                 })
                 .ToList();

@@ -5,5 +5,7 @@ namespace Stoady.DataAccess.Models.Parameters
         public string TeamName { get; init; }
 
         public string Avatar { get; init; }
+
+        public long CreatorId { get; init; }
     }
 }

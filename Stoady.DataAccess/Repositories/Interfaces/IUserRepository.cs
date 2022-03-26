@@ -9,9 +9,17 @@ namespace Stoady.DataAccess.Repositories.Interfaces
 {
     public interface IUserRepository
     {
+        Task<UserDao> GetUserById(
+            long id,
+            CancellationToken ct);
+
         Task<UserDao> GetUser(
             string email,
             string password,
+            CancellationToken ct);
+
+        public Task<PasswordDao> GetUserPasswordAndSalt(
+            long id,
             CancellationToken ct);
 
         Task<UserDao> GetUserByEmail(

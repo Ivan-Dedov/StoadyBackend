@@ -37,14 +37,12 @@ namespace Stoady.Handlers.Question.GetSavedQuestions
                     {
                         Id = q.Id,
                         QuestionText = q.QuestionText,
-                        AnswerText = q.AnswerText,
-                        TopicId = q.TopicId
+                        AnswerText = q.AnswerText
                     })
                 .ToList();
 
             return new GetSavedQuestionsResponse
             {
-                UserId = userId,
                 SavedQuestions = savedQuestions
             };
         }

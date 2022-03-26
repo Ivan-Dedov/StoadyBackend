@@ -16,7 +16,7 @@ namespace Stoady.Services
             return new List<Claim>
             {
                 new Claim(CustomJwtClaims.Id, userId.ToString()),
-                new Claim(ClaimTypes.Name, userName)
+                new Claim(CustomJwtClaims.Name, userName)
             };
         }
 
@@ -29,7 +29,7 @@ namespace Stoady.Services
             return new List<Claim>
             {
                 new Claim(CustomJwtClaims.Id, userId.ToString()),
-                new Claim(ClaimTypes.Name, userName),
+                new Claim(CustomJwtClaims.Name, userName),
                 new Claim(CustomJwtClaims.TeamId, teamId.ToString()),
                 new Claim(CustomJwtClaims.Role, role.ToString())
             };

@@ -19,7 +19,7 @@ namespace Stoady.Handlers.Team.CreateTeam
     public sealed class CreateTeamCommandHandler
         : IRequestHandler<CreateTeamCommand, Unit>
     {
-        private const string DefaultTeamAvatar = "";
+        private const string DefaultTeamAvatar = "https://ie.wampi.ru/2022/03/20/lake.png";
 
         private readonly ITeamRepository _teamRepository;
         private readonly ILogger<CreateTeamCommandHandler> _logger;
@@ -42,10 +42,12 @@ namespace Stoady.Handlers.Team.CreateTeam
                 new CreateTeamParameters
                 {
                     TeamName = teamName,
-                    Avatar = DefaultTeamAvatar
+                    Avatar = DefaultTeamAvatar,
+                    CreatorId = userId
                 },
                 ct);
 
+            // todo change logic
             await _teamRepository.AddMember(
                 new AddMemberParameters
                 {

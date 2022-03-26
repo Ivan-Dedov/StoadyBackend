@@ -7,5 +7,7 @@ namespace Stoady.DataAccess.Models.Dao
         public string Name { get; set; }
 
         public string Avatar { get; set; }
+
+        public long CreatorId { get; init; }
     }
 }

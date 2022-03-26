@@ -28,7 +28,7 @@ namespace Stoady
     public class Startup
     {
         private const string ApplicationName = "Stoady";
-        private const string ApplicationVersion = "v0.1";
+        private const string ApplicationVersion = "v0.4";
 
         public Startup(IConfiguration configuration)
         {
