@@ -45,7 +45,8 @@ namespace Stoady.DataAccess.Repositories
                     q.questionText as QuestionText,
                     q.topicId as TopicId
                     FROM questions q
-                    WHERE topicId = @topicId",
+                    WHERE topicId = @topicId
+                    ORDER BY q.id",
                 new { topicId });
         }
 
@@ -108,7 +109,8 @@ namespace Stoady.DataAccess.Repositories
                 q.topicId as TopicId
                 FROM userQuestions uq
                 LEFT JOIN questions q ON uq.questionId = q.id
-                WHERE userId = @userId",
+                WHERE userId = @userId
+                ORDER BY q.id",
                 new { userId });
         }
 

@@ -13,8 +13,9 @@ namespace Stoady.DataAccess.Repositories.Interfaces
             long id,
             CancellationToken ct);
 
-        Task<TeamDao> GetTeamByName(
+        Task<TeamDao> GetTeamByNameAndCreator(
             string name,
+            long creatorId,
             CancellationToken ct);
 
         Task<IEnumerable<UserDao>> GetTeamMembersByTeamId(

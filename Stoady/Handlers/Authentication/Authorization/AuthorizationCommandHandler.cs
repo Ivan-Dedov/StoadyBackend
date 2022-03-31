@@ -1,7 +1,4 @@
 using System;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -11,6 +8,7 @@ using Microsoft.Extensions.Logging;
 
 using Stoady.DataAccess.Repositories.Interfaces;
 using Stoady.Models.Handlers.Authentication;
+using Stoady.Services.Interfaces;
 
 namespace Stoady.Handlers.Authentication.Authorization
 {
@@ -24,13 +22,18 @@ namespace Stoady.Handlers.Authentication.Authorization
     {
         private readonly IUserRepository _userRepository;
         private readonly ILogger<AuthorizationCommandHandler> _logger;
+        private readonly IPasswordValidatorService _passwordValidatorService;
+
+        private const string Message = "Incorrect e-mail or password.";
 
         public AuthorizationCommandHandler(
             ILogger<AuthorizationCommandHandler> logger,
-            IUserRepository userRepository)
+            IUserRepository userRepository,
+            IPasswordValidatorService passwordValidatorService)
         {
             _logger = logger;
             _userRepository = userRepository;
+            _passwordValidatorService = passwordValidatorService;
         }
 
         public async Task<AuthorizationResponse> Handle(
@@ -39,40 +42,26 @@ namespace Stoady.Handlers.Authentication.Authorization
         {
             var (email, password) = request;
 
-            var user = await _userRepository.GetUserByEmail(email, ct);
+            var user = await _userRepository.GetUserWithPasswordByEmail(email, ct);
 
             if (user is null)
             {
-                const string message = "Incorrect e-mail or password.";
-                _logger.LogWarning(message);
-                throw new ApplicationException(message);
+                _logger.LogWarning(Message);
+                throw new ApplicationException(Message);
             }
 
-            var dbPasswordInfo = await _userRepository.GetUserPasswordAndSalt(user.Id, ct);
-
-            const string localSalt = "HSECourseWorkStoady";
-            var saltBytes = Convert.FromBase64String(dbPasswordInfo.Salt);
-            var passwordStr = Encoding.UTF8.GetBytes(password)
-                .Concat(saltBytes)
-                .Concat(Encoding.UTF8.GetBytes(localSalt));
-
-            var hashAlgorithm = SHA256.Create();
-            var hashedPassword = Convert.ToBase64String(
-                hashAlgorithm.ComputeHash(passwordStr.ToArray()));
-
-            if (hashedPassword != dbPasswordInfo.Password)
+            if (_passwordValidatorService.ValidatePassword(password, user.Password, user.Salt))
             {
-                const string message = "Incorrect e-mail or password.";
-                _logger.LogWarning(message);
-                throw new ApplicationException(message);
+                return new AuthorizationResponse
+                {
+                    Id = user.Id,
+                    Name = user.Username,
+                    AvatarId = user.AvatarId
+                };
             }
 
-            return new AuthorizationResponse
-            {
-                Id = user.Id,
-                Name = user.Username,
-                AvatarId = user.AvatarId
-            };
+            _logger.LogWarning(Message);
+            throw new ApplicationException(Message);
         }
     }
 }

@@ -30,7 +30,8 @@ namespace Stoady.DataAccess.Repositories
                     s.result as Result
                     FROM statistics s
                     LEFT JOIN topics t ON t.Id = s.topicId
-                    WHERE userId = @userId",
+                    WHERE userId = @userId
+                    ORDER BY s.id",
                 new { userId });
         }
 

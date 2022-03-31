@@ -44,7 +44,8 @@ namespace Stoady.DataAccess.Repositories
                     s.description as Description,
                     s.teamId as TeamId
                     FROM subjects s
-                    WHERE teamId = @teamId",
+                    WHERE teamId = @teamId
+                    ORDER BY s.Id",
                 new { teamId });
         }
 

@@ -28,7 +28,7 @@ namespace Stoady.DataAccess.Repositories
                     t.description as Description,
                     t.subjectId as SubjectId
                     FROM topics t
-                    WHERE id = @id",
+                    WHERE t.id = @id",
                 new { id });
         }
 
@@ -44,7 +44,8 @@ namespace Stoady.DataAccess.Repositories
                     t.description as Description,
                     t.subjectId as SubjectId
                     FROM topics t
-                    WHERE subjectId = @subjectId",
+                    WHERE subjectId = @subjectId
+                    ORDER BY t.id",
                 new { subjectId });
         }
 

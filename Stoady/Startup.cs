@@ -83,6 +83,7 @@ namespace Stoady
             // Services
             services.AddTransient<ITokenService, TokenService>();
             services.AddTransient<IClaimService, ClaimService>();
+            services.AddTransient<IPasswordValidatorService, PasswordValidatorService>();
             services.AddScoped<IRightsValidatorService, RightsValidatorService>();
 
             // Repositories

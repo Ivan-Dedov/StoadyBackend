@@ -18,8 +18,8 @@ namespace Stoady.DataAccess.Repositories.Interfaces
             string password,
             CancellationToken ct);
 
-        public Task<PasswordDao> GetUserPasswordAndSalt(
-            long id,
+        public Task<UserWithPasswordDao> GetUserWithPasswordByEmail(
+            string email,
             CancellationToken ct);
 
         Task<UserDao> GetUserByEmail(

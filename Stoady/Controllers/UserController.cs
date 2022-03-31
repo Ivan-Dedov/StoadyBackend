@@ -53,18 +53,19 @@ namespace Stoady.Controllers
         /// <param name="token"></param>
         /// <returns></returns>
         [HttpPost("register")]
-        public async Task<IActionResult> RegisterUser(
+        public async Task<RegisterUserResponse> RegisterUser(
             RegisterUserRequest request,
             CancellationToken token)
         {
             var command = new RegisterUserCommand(
                 request.Username,
                 request.Email,
-                request.Password);
+                request.Password,
+                request.AvatarId);
 
-            await _mediator.Send(command, token);
+            var result = await _mediator.Send(command, token);
 
-            return Ok();
+            return result;
         }
 
         /// <summary>

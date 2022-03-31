@@ -47,12 +47,11 @@ namespace Stoady.Handlers.Team.CreateTeam
                 },
                 ct);
 
-            // todo change logic
             await _teamRepository.AddMember(
                 new AddMemberParameters
                 {
                     RoleId = (long)Role.Creator,
-                    TeamId = (await _teamRepository.GetTeamByName(teamName, ct)).Id,
+                    TeamId = (await _teamRepository.GetTeamByNameAndCreator(teamName, userId, ct)).Id,
                     UserId = userId
                 },
                 ct);

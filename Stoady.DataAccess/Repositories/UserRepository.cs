@@ -60,7 +60,7 @@ namespace Stoady.DataAccess.Repositories
         {
             await using var dbConnection = new NpgsqlConnection(ConnectionString);
             return await dbConnection.QuerySingleOrDefaultAsync<UserDao>(
-                @"SELECT 
+                @"SELECT
                     u.id as Id,
                     u.username as Username,
                     u.email as Email,
@@ -72,26 +72,30 @@ namespace Stoady.DataAccess.Repositories
                 new { email });
         }
 
-        public async Task<PasswordDao> GetUserPasswordAndSalt(
-            long id,
+        public async Task<UserWithPasswordDao> GetUserWithPasswordByEmail(
+            string email,
             CancellationToken ct)
         {
             await using var dbConnection = new NpgsqlConnection(ConnectionString);
-            return await dbConnection.QuerySingleOrDefaultAsync<PasswordDao>(
-                @"SELECT 
+            return await dbConnection.QuerySingleOrDefaultAsync<UserWithPasswordDao>(
+                @"SELECT
+                    u.id as Id,
+                    u.username as Username,
+                    u.email as Email,
+                    u.refreshToken as RefreshToken,
+                    u.refreshTokenExpiryTime as RefreshTokenExpiryTime,
+                    u.avatarId as AvatarId,
                     u.password as Password,
                     u.salt as Salt
                     FROM users u
-                    WHERE id = @id",
-                new { id });
+                    WHERE email = @email",
+                new { email });
         }
 
         public async Task<int> AddUser(
             AddUserParameters parameters,
             CancellationToken ct)
         {
-            const int defaultAvatarId = 0;
-
             await using var dbConnection = new NpgsqlConnection(ConnectionString);
             return await dbConnection.ExecuteAsync(
                 @"INSERT INTO users
@@ -102,7 +106,7 @@ namespace Stoady.DataAccess.Repositories
                     username = parameters.Username,
                     email = parameters.Email,
                     password = parameters.Password,
-                    avatarId = defaultAvatarId,
+                    avatarId = parameters.AvatarId,
                     salt = parameters.Salt
                 });
         }

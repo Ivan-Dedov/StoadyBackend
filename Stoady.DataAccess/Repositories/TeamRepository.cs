@@ -28,12 +28,13 @@ namespace Stoady.DataAccess.Repositories
                     t.avatar as Avatar,
                     t.creatorId as CreatorId
                     FROM teams t
-                    WHERE id = @id",
+                    WHERE t.id = @id",
                 new { id });
         }
 
-        public async Task<TeamDao> GetTeamByName(
+        public async Task<TeamDao> GetTeamByNameAndCreator(
             string name,
+            long creatorId,
             CancellationToken ct)
         {
             await using var dbConnection = new NpgsqlConnection(ConnectionString);
@@ -44,9 +45,10 @@ namespace Stoady.DataAccess.Repositories
                     t.avatar as Avatar,
                     t.creatorId as CreatorId
                     FROM teams t
-                    WHERE name = @name
+                    WHERE t.name = @name
+                    AND t.creatorId = @creatorId
                     ORDER BY t.id DESC",
-                new { name });
+                new { name, creatorId });
         }
 
         public async Task<IEnumerable<UserDao>> GetTeamMembersByTeamId(
@@ -65,7 +67,8 @@ namespace Stoady.DataAccess.Repositories
                     u.avatarId as AvatarId
                     FROM teamUsers tu
                     LEFT JOIN users u ON u.id = tu.userId
-                    WHERE teamId = @teamId",
+                    WHERE tu.teamId = @teamId
+                    ORDER BY tu.id",
                 new { teamId });
         }
 

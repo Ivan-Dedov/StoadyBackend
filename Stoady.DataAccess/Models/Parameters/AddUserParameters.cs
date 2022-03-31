@@ -9,5 +9,7 @@ namespace Stoady.DataAccess.Models.Parameters
         public string Password { get; init; }
 
         public string Salt { get; init; }
+
+        public int AvatarId { get; init; }
     }
 }
