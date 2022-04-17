@@ -1,20 +1,18 @@
 using System;
 using System.IO;
 using System.Reflection;
-using System.Text;
 using System.Text.Json.Serialization;
+
+using FluentValidation;
+using FluentValidation.AspNetCore;
 
 using MediatR;
 
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 using Stoady.DataAccess.Repositories;
@@ -27,21 +25,21 @@ namespace Stoady
 {
     public class Startup
     {
-        private const string ApplicationName = "Stoady";
-        private const string ApplicationVersion = "v0.4";
+        public const string ApplicationName = "Stoady";
+        private const string ApplicationVersion = "v1";
 
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
         }
 
-        public IConfiguration Configuration { get; }
+        private IConfiguration Configuration { get; }
 
-        public void ConfigureServices(IServiceCollection services)
+        public static void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers()
-                .AddJsonOptions(options =>
-                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+                .AddJsonOptions(x => x.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()))
+                .AddFluentValidation(x => x.RegisterValidatorsFromAssemblyContaining<Startup>());
 
             services.AddSwaggerGen(c =>
             {
@@ -57,28 +55,35 @@ namespace Stoady
                 c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
             });
 
-            // JWT авторизация
-            var key = Encoding.ASCII.GetBytes(AuthorizationOptions.Secret);
-            services.AddAuthentication(x =>
-                {
-                    x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                })
-                .AddJwtBearer(x =>
-                {
-                    x.RequireHttpsMetadata = true;
-                    x.SaveToken = true;
-                    x.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new SymmetricSecurityKey(key),
-                        ValidateIssuer = false,
-                        ValidateAudience = false
-                    };
-                });
+            // TODO: JWT авторизация
+            // var key = Encoding.ASCII.GetBytes(AuthorizationOptions.Secret);
+            // services.AddAuthentication(x =>
+            //     {
+            //         x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            //         x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            //     })
+            //     .AddJwtBearer(x =>
+            //     {
+            //         x.RequireHttpsMetadata = true;
+            //         x.SaveToken = true;
+            //         x.TokenValidationParameters = new TokenValidationParameters
+            //         {
+            //             ValidateIssuerSigningKey = true,
+            //             IssuerSigningKey = new SymmetricSecurityKey(key),
+            //             ValidateIssuer = false,
+            //             ValidateAudience = false
+            //         };
+            //     });
 
             // Dependency Injection
             services.AddMediatR(typeof(Startup));
+
+            // Валидация
+            services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+            services.AddValidatorsFromAssembly(typeof(Startup).Assembly);
+
+            // Обработчик исключений
+            services.AddTransient<ExceptionHandlingMiddleware>();
 
             // Services
             services.AddTransient<ITokenService, TokenService>();
@@ -96,7 +101,7 @@ namespace Stoady
             services.AddTransient<IUserRepository, UserRepository>();
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public static void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -118,25 +123,8 @@ namespace Stoady
             app.UseAuthentication();
             app.UseAuthorization();
 
-            // Делаем отображение ошибок как JSON
-            app.UseExceptionHandler(
-                c => c.Run(
-                    async context =>
-                    {
-                        var exception = context.Features
-                            .Get<IExceptionHandlerPathFeature>()
-                            ?.Error;
-
-                        var response =
-                            new
-                            {
-                                source = exception?.Source,
-                                message = exception?.Message,
-                                stackTrace = exception?.StackTrace
-                            };
-
-                        await context.Response.WriteAsJsonAsync(response);
-                    }));
+            // Красиво кидаем исключения
+            app.UseMiddleware<ExceptionHandlingMiddleware>();
 
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }

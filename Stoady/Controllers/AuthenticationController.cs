@@ -30,13 +30,10 @@ namespace Stoady.Controllers
         /// <summary>
         /// Аутентифицировать пользователя по почте и паролю
         /// </summary>
-        /// <param name="request"></param>
-        /// <param name="token"></param>
-        /// <returns></returns>
         [HttpPost]
         public async Task<ActionResult<AuthenticationResponse>> Authenticate(
             [FromBody] AuthenticationRequest request,
-            CancellationToken token)
+            CancellationToken ct)
         {
             var command = new AuthenticationCommand(
                 request.Email,
@@ -44,7 +41,7 @@ namespace Stoady.Controllers
 
             try
             {
-                var result = await _mediator.Send(command, token);
+                var result = await _mediator.Send(command, ct);
                 return Ok(result);
             }
             catch (ApplicationException)
@@ -56,13 +53,10 @@ namespace Stoady.Controllers
         /// <summary>
         /// Авторизовать пользователя по почте и паролю (временная упрощенная ручка)
         /// </summary>
-        /// <param name="request"></param>
-        /// <param name="token"></param>
-        /// <returns></returns>
         [HttpPost("authorize")]
         public async Task<ActionResult<AuthorizationResponse>> Authenticate(
             [FromBody] AuthorizationRequest request,
-            CancellationToken token)
+            CancellationToken ct)
         {
             var command = new AuthorizationCommand(
                 request.Email,
@@ -70,7 +64,7 @@ namespace Stoady.Controllers
 
             try
             {
-                var result = await _mediator.Send(command, token);
+                var result = await _mediator.Send(command, ct);
                 return Ok(result);
             }
             catch (ApplicationException)

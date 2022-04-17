@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -33,7 +34,14 @@ namespace Stoady.Handlers.Subject.RemoveSubject
         {
             var subjectId = request.SubjectId;
 
-            await _subjectRepository.RemoveSubject(subjectId, ct);
+            var result = await _subjectRepository.RemoveSubject(subjectId, ct);
+
+            if (result != 1)
+            {
+                const string message = "Something went wrong when removing the subject. Please, try again.";
+                _logger.LogWarning(message);
+                throw new ApplicationException(message);
+            }
 
             return Unit.Value;
         }

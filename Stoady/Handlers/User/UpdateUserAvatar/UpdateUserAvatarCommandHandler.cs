@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -35,13 +36,20 @@ namespace Stoady.Handlers.User.UpdateUserAvatar
         {
             var (userId, avatarId) = request;
 
-            await _userRepository.ChangeUserAvatarById(
+            var result = await _userRepository.ChangeUserAvatarById(
                 new ChangeUserAvatarParameters
                 {
                     UserId = userId,
                     AvatarId = avatarId
                 },
                 ct);
+
+            if (result != 1)
+            {
+                const string message = "Something went wrong when changing the avatar. Please, try again.";
+                _logger.LogWarning(message + Environment.NewLine + $" (UserId = {userId})");
+                throw new ApplicationException(message + Environment.NewLine + $" (UserId = {userId})");
+            }
 
             return Unit.Value;
         }

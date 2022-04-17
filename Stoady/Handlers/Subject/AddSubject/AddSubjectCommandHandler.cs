@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -36,7 +37,7 @@ namespace Stoady.Handlers.Subject.AddSubject
         {
             var (teamId, subjectName, subjectDescription) = request;
 
-            await _subjectRepository.AddSubject(
+            var result = await _subjectRepository.AddSubject(
                 new AddSubjectParameters
                 {
                     TeamId = teamId,
@@ -44,6 +45,13 @@ namespace Stoady.Handlers.Subject.AddSubject
                     SubjectDescription = subjectDescription,
                 },
                 ct);
+
+            if (result != 1)
+            {
+                const string message = "Something went wrong when creating the subject. Please, try again.";
+                _logger.LogWarning(message);
+                throw new ApplicationException(message);
+            }
 
             return Unit.Value;
         }

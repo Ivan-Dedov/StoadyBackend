@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -35,13 +36,20 @@ namespace Stoady.Handlers.Question.SaveQuestion
         {
             var (userId, questionId) = request;
 
-            await _questionRepository.SaveQuestion(
+            var result = await _questionRepository.SaveQuestion(
                 new SaveQuestionParameters
                 {
                     UserId = userId,
                     QuestionId = questionId
                 },
                 ct);
+
+            if (result != 1)
+            {
+                const string message = "Something went wrong when saving this question. Please, try again.";
+                _logger.LogWarning(message);
+                throw new ApplicationException(message);
+            }
 
             return Unit.Value;
         }

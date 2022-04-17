@@ -32,16 +32,16 @@ namespace Stoady.Controllers
         /// Получить команды, в которых состоит пользователь
         /// </summary>
         /// <param name="userId">ID пользователя</param>
-        /// <param name="token"></param>
+        /// <param name="ct"></param>
         /// <returns></returns>
         [HttpGet("teams")]
         public async Task<GetUserTeamsResponse> GetUserTeams(
             [FromQuery] long userId,
-            CancellationToken token)
+            CancellationToken ct)
         {
             var command = new GetUserTeamsCommand(userId);
 
-            var result = await _mediator.Send(command, token);
+            var result = await _mediator.Send(command, ct);
 
             return result;
         }
@@ -50,12 +50,12 @@ namespace Stoady.Controllers
         /// Зарегистрировать нового пользователя
         /// </summary>
         /// <param name="request"></param>
-        /// <param name="token"></param>
+        /// <param name="ct"></param>
         /// <returns></returns>
         [HttpPost("register")]
         public async Task<RegisterUserResponse> RegisterUser(
             RegisterUserRequest request,
-            CancellationToken token)
+            CancellationToken ct)
         {
             var command = new RegisterUserCommand(
                 request.Username,
@@ -63,7 +63,7 @@ namespace Stoady.Controllers
                 request.Password,
                 request.AvatarId);
 
-            var result = await _mediator.Send(command, token);
+            var result = await _mediator.Send(command, ct);
 
             return result;
         }
@@ -73,19 +73,19 @@ namespace Stoady.Controllers
         /// </summary>
         /// <param name="userId">ID пользователя</param>
         /// <param name="avatarId">ID аватара</param>
-        /// <param name="token"></param>
+        /// <param name="ct"></param>
         /// <returns></returns>
         [HttpPut("{userId:long:min(1)}/avatar/set")]
         public async Task<IActionResult> UpdateUserAvatar(
             long userId,
             [FromQuery] int avatarId,
-            CancellationToken token)
+            CancellationToken ct)
         {
             var command = new UpdateUserAvatarCommand(
                 userId,
                 avatarId);
 
-            await _mediator.Send(command, token);
+            await _mediator.Send(command, ct);
 
             return Ok();
         }

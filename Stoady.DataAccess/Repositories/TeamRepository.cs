@@ -9,37 +9,42 @@ using Npgsql;
 using Stoady.DataAccess.Models.Dao;
 using Stoady.DataAccess.Models.Parameters;
 using Stoady.DataAccess.Repositories.Interfaces;
+using Stoady.DataAccess.Repositories.Settings;
 
 namespace Stoady.DataAccess.Repositories
 {
     public sealed class TeamRepository : ITeamRepository
     {
-        private const string ConnectionString = "Server=ec2-52-211-158-144.eu-west-1.compute.amazonaws.com;Port=5432;Database=d9elrdlh8nmq04;Username=rxxaapxbpdyrlk;Password=97ecec32a181a8066f081d64aef963e0dda3c6cda9f3b6af4d19e73d5ca14a01";
-
+        /// <inheritdoc />
         public async Task<TeamDao> GetTeamById(
             long id,
             CancellationToken ct)
         {
-            await using var dbConnection = new NpgsqlConnection(ConnectionString);
+            await using var dbConnection = new NpgsqlConnection(RepositorySettings.ConnectionString);
             return await dbConnection.QuerySingleOrDefaultAsync<TeamDao>(
-                @"SELECT
+                new CommandDefinition(
+                    @"SELECT
                     t.id as Id,
                     t.name as Name,
                     t.avatar as Avatar,
                     t.creatorId as CreatorId
                     FROM teams t
                     WHERE t.id = @id",
-                new { id });
+                    new { id },
+                    commandTimeout: RepositorySettings.TimeoutSeconds,
+                    cancellationToken: ct));
         }
 
+        /// <inheritdoc />
         public async Task<TeamDao> GetTeamByNameAndCreator(
             string name,
             long creatorId,
             CancellationToken ct)
         {
-            await using var dbConnection = new NpgsqlConnection(ConnectionString);
+            await using var dbConnection = new NpgsqlConnection(RepositorySettings.ConnectionString);
             return await dbConnection.QueryFirstOrDefaultAsync<TeamDao>(
-                @"SELECT
+                new CommandDefinition(
+                    @"SELECT
                     t.id as Id,
                     t.name as Name,
                     t.avatar as Avatar,
@@ -48,16 +53,20 @@ namespace Stoady.DataAccess.Repositories
                     WHERE t.name = @name
                     AND t.creatorId = @creatorId
                     ORDER BY t.id DESC",
-                new { name, creatorId });
+                    new { name, creatorId },
+                    commandTimeout: RepositorySettings.TimeoutSeconds,
+                    cancellationToken: ct));
         }
 
+        /// <inheritdoc />
         public async Task<IEnumerable<UserDao>> GetTeamMembersByTeamId(
             long teamId,
             CancellationToken ct)
         {
-            await using var dbConnection = new NpgsqlConnection(ConnectionString);
+            await using var dbConnection = new NpgsqlConnection(RepositorySettings.ConnectionString);
             return await dbConnection.QueryAsync<UserDao>(
-                @"SELECT
+                new CommandDefinition(
+                    @"SELECT
                     u.id as Id,
                     u.username as Username,
                     u.email as Email,
@@ -66,78 +75,96 @@ namespace Stoady.DataAccess.Repositories
                     u.password as Password,
                     u.avatarId as AvatarId
                     FROM teamUsers tu
-                    LEFT JOIN users u ON u.id = tu.userId
+                    INNER JOIN users u ON u.id = tu.userId
                     WHERE tu.teamId = @teamId
                     ORDER BY tu.id",
-                new { teamId });
+                    new { teamId },
+                    commandTimeout: RepositorySettings.TimeoutSeconds,
+                    cancellationToken: ct));
         }
 
+        /// <inheritdoc />
         public async Task<int> CreateTeam(
             CreateTeamParameters parameters,
             CancellationToken ct)
         {
-            await using var dbConnection = new NpgsqlConnection(ConnectionString);
+            await using var dbConnection = new NpgsqlConnection(RepositorySettings.ConnectionString);
             return await dbConnection.ExecuteAsync(
-                @"INSERT INTO teams
-                (name, avatar, creatorId) VALUES 
-                (@name, @avatar, @creatorId)",
-                new
-                {
-                    name = parameters.TeamName,
-                    avatar = parameters.Avatar,
-                    creatorId = parameters.CreatorId
-                });
+                new CommandDefinition(
+                    @"INSERT INTO teams
+                    (name, avatar, creatorId) VALUES 
+                    (@name, @avatar, @creatorId)",
+                    new
+                    {
+                        name = parameters.TeamName,
+                        avatar = parameters.Avatar,
+                        creatorId = parameters.CreatorId
+                    },
+                    commandTimeout: RepositorySettings.TimeoutSeconds,
+                    cancellationToken: ct));
         }
 
+        /// <inheritdoc />
         public async Task<int> AddMember(
             AddMemberParameters parameters,
             CancellationToken ct)
         {
-            await using var dbConnection = new NpgsqlConnection(ConnectionString);
+            await using var dbConnection = new NpgsqlConnection(RepositorySettings.ConnectionString);
             return await dbConnection.ExecuteAsync(
-                @"INSERT INTO teamUsers
-                (teamId, userId, roleId) VALUES 
-                (@teamId, @userId, @roleId)",
-                new
-                {
-                    teamId = parameters.TeamId,
-                    userId = parameters.UserId,
-                    roleId = parameters.RoleId
-                });
+                new CommandDefinition(
+                    @"INSERT INTO teamUsers
+                    (teamId, userId, roleId) VALUES 
+                    (@teamId, @userId, @roleId)",
+                    new
+                    {
+                        teamId = parameters.TeamId,
+                        userId = parameters.UserId,
+                        roleId = parameters.RoleId
+                    },
+                    commandTimeout: RepositorySettings.TimeoutSeconds,
+                    cancellationToken: ct));
         }
 
         public async Task<int> ChangeMemberStatus(
             ChangeMemberStatusParameters parameters,
             CancellationToken ct)
         {
-            await using var dbConnection = new NpgsqlConnection(ConnectionString);
+            await using var dbConnection = new NpgsqlConnection(RepositorySettings.ConnectionString);
             return await dbConnection.ExecuteAsync(
-                @"UPDATE teamUsers
-                SET roleId = @roleId
-                WHERE userId = @userId
-                AND teamId = @teamId",
-                new
-                {
-                    teamId = parameters.TeamId,
-                    userId = parameters.UserId,
-                    roleId = parameters.RoleId
-                });
+                new CommandDefinition(
+                    @"UPDATE teamUsers
+                    SET roleId = @roleId
+                    WHERE userId = @userId
+                    AND teamId = @teamId",
+                    new
+                    {
+                        teamId = parameters.TeamId,
+                        userId = parameters.UserId,
+                        roleId = parameters.RoleId
+                    },
+                    commandTimeout: RepositorySettings.TimeoutSeconds,
+                    cancellationToken: ct));
         }
 
-        public async Task<int> ChangeTeamAvatar(
-            ChangeTeamAvatarParameters parameters,
+        public async Task<int> EditTeam(
+            EditTeamParameters parameters,
             CancellationToken ct)
         {
-            await using var dbConnection = new NpgsqlConnection(ConnectionString);
+            await using var dbConnection = new NpgsqlConnection(RepositorySettings.ConnectionString);
             return await dbConnection.ExecuteAsync(
-                @"UPDATE teams
-                SET avatar = @avatar
-                WHERE id = @id",
-                new
-                {
-                    id = parameters.TeamId,
-                    avatar = parameters.TeamAvatar
-                });
+                new CommandDefinition(
+                    @"UPDATE teams
+                    SET avatar = @avatar,
+                        name = @name
+                    WHERE id = @id",
+                    new
+                    {
+                        id = parameters.TeamId,
+                        name = parameters.TeamName,
+                        avatar = parameters.TeamAvatar
+                    },
+                    commandTimeout: RepositorySettings.TimeoutSeconds,
+                    cancellationToken: ct));
         }
 
         public async Task<int> RemoveMember(
@@ -145,12 +172,15 @@ namespace Stoady.DataAccess.Repositories
             long teamId,
             CancellationToken ct)
         {
-            await using var dbConnection = new NpgsqlConnection(ConnectionString);
+            await using var dbConnection = new NpgsqlConnection(RepositorySettings.ConnectionString);
             return await dbConnection.ExecuteAsync(
-                @"DELETE FROM teamUsers tu
-                WHERE userId = @userId
-                AND teamId = @teamId",
-                new { userId, teamId });
+                new CommandDefinition(
+                    @"DELETE FROM teamUsers tu
+                    WHERE userId = @userId
+                    AND teamId = @teamId",
+                    new { userId, teamId },
+                    commandTimeout: RepositorySettings.TimeoutSeconds,
+                    cancellationToken: ct));
         }
     }
 }

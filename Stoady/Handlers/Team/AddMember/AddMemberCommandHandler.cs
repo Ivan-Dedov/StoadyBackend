@@ -6,7 +6,6 @@ using MediatR;
 
 using Microsoft.Extensions.Logging;
 
-using Stoady.DataAccess.Models.Dao;
 using Stoady.DataAccess.Models.Parameters;
 using Stoady.DataAccess.Repositories.Interfaces;
 using Stoady.Models;
@@ -49,22 +48,31 @@ namespace Stoady.Handlers.Team.AddMember
         {
             var (executorId, teamId, email) = request;
 
-            if (!await _rightsValidator.ValidateRights(teamId, executorId, ct))
+            if (await _rightsValidator.ValidateRights(teamId, executorId, ct) is false)
             {
-                throw new ApplicationException("Cannot update user: no rights.");
+                throw new ApplicationException("You do not have permission to add users to this team.");
             }
 
-            var user = await _userRepository.GetUserByEmail(email, ct);
-            var role = await _roleRepository.GetRoleByName(Role.Member.ToString(), ct);
+            var userTask = _userRepository.GetUserByEmail(email, ct);
+            var roleTask = _roleRepository.GetRoleByName(Role.Member.ToString(), ct);
 
-            await _teamRepository.AddMember(
+            await Task.WhenAll(userTask, roleTask);
+
+            var result = await _teamRepository.AddMember(
                 new AddMemberParameters
                 {
                     TeamId = teamId,
-                    UserId = user.Id,
-                    RoleId = role.Id
+                    UserId = userTask.Result.Id,
+                    RoleId = roleTask.Result.Id
                 },
                 ct);
+
+            if (result != 1)
+            {
+                const string message = "Something went wrong when adding this user to the team. Please, try again.";
+                _logger.LogWarning(message);
+                throw new ApplicationException(message);
+            }
 
             return Unit.Value;
         }

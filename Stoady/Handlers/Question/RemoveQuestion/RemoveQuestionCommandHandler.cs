@@ -34,7 +34,14 @@ namespace Stoady.Handlers.Question.RemoveQuestion
         {
             var questionId = request.QuestionId;
 
-            await _questionRepository.RemoveQuestion(questionId, ct);
+            var result = await _questionRepository.RemoveQuestion(questionId, ct);
+
+            if (result != 1)
+            {
+                const string message = "Something went wrong when removing the question. Please, try again.";
+                _logger.LogWarning(message);
+                throw new ApplicationException(message);
+            }
 
             return Unit.Value;
         }

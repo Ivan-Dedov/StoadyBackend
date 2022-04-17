@@ -1,11 +1,8 @@
-using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 using MediatR;
-
-using Microsoft.Extensions.Logging;
 
 using Stoady.DataAccess.Models.Parameters;
 using Stoady.DataAccess.Repositories.Interfaces;
@@ -22,13 +19,10 @@ namespace Stoady.Handlers.Testing.SaveTestResults
         : IRequestHandler<SaveTestResultsCommand, Unit>
     {
         private readonly IStatisticsRepository _statisticsRepository;
-        private readonly ILogger<SaveTestResultsCommandHandler> _logger;
 
         public SaveTestResultsCommandHandler(
-            ILogger<SaveTestResultsCommandHandler> logger,
             IStatisticsRepository statisticsRepository)
         {
-            _logger = logger;
             _statisticsRepository = statisticsRepository;
         }
 
@@ -38,11 +32,10 @@ namespace Stoady.Handlers.Testing.SaveTestResults
         {
             var (userId, topicId, result) = request;
 
-            var existingStatistics = (await _statisticsRepository
-                    .GetStatisticsByUserId(userId, ct))
-                .Where(s => s.TopicId == topicId);
+            var existingStatistics = await _statisticsRepository
+                .GetStatisticsByUserId(userId, ct);
 
-            if (existingStatistics.Any())
+            if (existingStatistics.Any(s => s.TopicId == topicId))
             {
                 await _statisticsRepository.EditStatistics(
                     new EditStatisticsParameters

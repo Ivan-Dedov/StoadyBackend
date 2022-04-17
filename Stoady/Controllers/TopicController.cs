@@ -34,16 +34,16 @@ namespace Stoady.Controllers
         /// Получить информацию о теме
         /// </summary>
         /// <param name="topicId">ID темы</param>
-        /// <param name="token"></param>
+        /// <param name="ct"></param>
         /// <returns></returns>
         [HttpGet("{topicId:long:min(1)}")]
         public async Task<GetTopicInfoResponse> GetTopicInfo(
             long topicId,
-            CancellationToken token)
+            CancellationToken ct)
         {
             var command = new GetTopicInfoCommand(topicId);
 
-            var result = await _mediator.Send(command, token);
+            var result = await _mediator.Send(command, ct);
 
             return result;
         }
@@ -52,19 +52,19 @@ namespace Stoady.Controllers
         /// Добавить тему
         /// </summary>
         /// <param name="request"></param>
-        /// <param name="token"></param>
+        /// <param name="ct"></param>
         /// <returns></returns>
         [HttpPost("add")]
         public async Task<IActionResult> AddTopic(
             [FromBody] AddTopicRequest request,
-            CancellationToken token)
+            CancellationToken ct)
         {
             var command = new AddTopicCommand(
                 request.SubjectId,
                 request.TopicName,
                 request.TopicDescription);
 
-            await _mediator.Send(command, token);
+            await _mediator.Send(command, ct);
 
             return Ok();
         }
@@ -74,20 +74,20 @@ namespace Stoady.Controllers
         /// </summary>
         /// <param name="topicId">ID темы</param>
         /// <param name="request"></param>
-        /// <param name="token"></param>
+        /// <param name="ct"></param>
         /// <returns></returns>
         [HttpPost("edit/{topicId:long:min(1)}")]
         public async Task<IActionResult> EditTopic(
             long topicId,
             [FromBody] EditTopicRequest request,
-            CancellationToken token)
+            CancellationToken ct)
         {
             var command = new EditTopicCommand(
                 topicId,
                 request.TopicName,
                 request.TopicDescription);
 
-            await _mediator.Send(command, token);
+            await _mediator.Send(command, ct);
 
             return Ok();
         }
@@ -96,16 +96,16 @@ namespace Stoady.Controllers
         /// Удалить тему
         /// </summary>
         /// <param name="topicId">ID темы</param>
-        /// <param name="token"></param>
+        /// <param name="ct"></param>
         /// <returns></returns>
         [HttpDelete("remove/{topicId:long:min(1)}")]
         public async Task<IActionResult> RemoveTopic(
             long topicId,
-            CancellationToken token)
+            CancellationToken ct)
         {
             var command = new RemoveTopicCommand(topicId);
 
-            await _mediator.Send(command, token);
+            await _mediator.Send(command, ct);
 
             return Ok();
         }

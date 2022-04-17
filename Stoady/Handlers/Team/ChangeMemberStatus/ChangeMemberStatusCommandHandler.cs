@@ -46,9 +46,22 @@ namespace Stoady.Handlers.Team.ChangeMemberStatus
         {
             var (executorId, teamId, userId, role) = request;
 
-            if (!await _rightsValidator.ValidateRights(teamId, executorId, ct))
+            var userRole = await _roleRepository.GetUserRoleByTeamId(userId, teamId, ct);
+            if (userRole is null)
             {
-                throw new ApplicationException("Cannot update user: no rights.");
+                var message = $"Could not find user with ID = {userId} in team with ID = {teamId}.";
+                _logger.LogError(message);
+                throw new ApplicationException(message);
+            }
+
+            if (userRole.Name == Role.Creator.ToString())
+            {
+                throw new ApplicationException("You cannot edit the creator's role.");
+            }
+
+            if (await _rightsValidator.ValidateRights(teamId, executorId, ct) is false)
+            {
+                throw new ApplicationException("You do not have permission to change this user's role.");
             }
 
             await _teamRepository.ChangeMemberStatus(

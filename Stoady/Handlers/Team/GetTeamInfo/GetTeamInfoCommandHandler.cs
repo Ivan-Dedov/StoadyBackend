@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -46,11 +47,19 @@ namespace Stoady.Handlers.Team.GetTeamInfo
             var team = teamTask.Result;
             var subjects = subjectsTask.Result;
 
+            if (team is null || subjects is null)
+            {
+                var message = $"Could not find team with ID = {teamId}";
+                _logger.LogError(message);
+                throw new ApplicationException(message);
+            }
+
             return new GetTeamInfoResponse
             {
                 Name = team.Name,
                 Picture = team.Avatar,
-                Subjects = subjects.Select(x =>
+                Subjects = subjects
+                    .Select(x =>
                         new SubjectInTeam
                         {
                             Id = x.Id,

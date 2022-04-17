@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -10,19 +9,20 @@ using Npgsql;
 using Stoady.DataAccess.Models.Dao;
 using Stoady.DataAccess.Models.Parameters;
 using Stoady.DataAccess.Repositories.Interfaces;
+using Stoady.DataAccess.Repositories.Settings;
 
 namespace Stoady.DataAccess.Repositories
 {
     public sealed class QuestionRepository : IQuestionRepository
     {
-        private const string ConnectionString = "Server=ec2-52-211-158-144.eu-west-1.compute.amazonaws.com;Port=5432;Database=d9elrdlh8nmq04;Username=rxxaapxbpdyrlk;Password=97ecec32a181a8066f081d64aef963e0dda3c6cda9f3b6af4d19e73d5ca14a01";
-
+        /// <inheritdoc />
         public async Task<QuestionDao> GetQuestionById(
             long id,
             CancellationToken ct)
         {
-            await using var dbConnection = new NpgsqlConnection(ConnectionString);
+            await using var dbConnection = new NpgsqlConnection(RepositorySettings.ConnectionString);
             return await dbConnection.QuerySingleOrDefaultAsync<QuestionDao>(
+                new CommandDefinition(
                     @"SELECT
                     q.id as Id,
                     q.answerText as AnswerText,
@@ -30,16 +30,20 @@ namespace Stoady.DataAccess.Repositories
                     q.topicId as TopicId
                     FROM questions q
                     WHERE id = @id",
-                    new { id });
+                    new { id },
+                    commandTimeout: RepositorySettings.TimeoutSeconds,
+                    cancellationToken: ct));
         }
 
+        /// <inheritdoc />
         public async Task<IEnumerable<QuestionDao>> GetQuestionsByTopicId(
             long topicId,
             CancellationToken ct)
         {
-            await using var dbConnection = new NpgsqlConnection(ConnectionString);
+            await using var dbConnection = new NpgsqlConnection(RepositorySettings.ConnectionString);
             return await dbConnection.QueryAsync<QuestionDao>(
-                @"SELECT
+                new CommandDefinition(
+                    @"SELECT
                     q.id as Id,
                     q.answerText as AnswerText,
                     q.questionText as QuestionText,
@@ -47,103 +51,129 @@ namespace Stoady.DataAccess.Repositories
                     FROM questions q
                     WHERE topicId = @topicId
                     ORDER BY q.id",
-                new { topicId });
+                    new { topicId },
+                    commandTimeout: RepositorySettings.TimeoutSeconds,
+                    cancellationToken: ct));
         }
 
+        /// <inheritdoc />
         public async Task<int> AddQuestion(
             AddQuestionParameters parameters,
             CancellationToken ct)
         {
-            await using var dbConnection = new NpgsqlConnection(ConnectionString);
+            await using var dbConnection = new NpgsqlConnection(RepositorySettings.ConnectionString);
             return await dbConnection.ExecuteAsync(
-                @"INSERT INTO questions
-                (questionText, answerText, topicId) VALUES 
-                (@questionText, @answerText, @topicId)",
-                new
-                {
-                    questionText = parameters.QuestionText,
-                    answerText = parameters.AnswerText,
-                    topicId = parameters.TopicId
-                });
+                new CommandDefinition(
+                    @"INSERT INTO questions
+                    (questionText, answerText, topicId) VALUES 
+                    (@questionText, @answerText, @topicId)",
+                    new
+                    {
+                        questionText = parameters.QuestionText,
+                        answerText = parameters.AnswerText,
+                        topicId = parameters.TopicId
+                    },
+                    commandTimeout: RepositorySettings.TimeoutSeconds,
+                    cancellationToken: ct));
         }
 
+        /// <inheritdoc />
         public async Task<int> EditQuestion(
             EditQuestionParameters parameters,
             CancellationToken ct)
         {
-            await using var dbConnection = new NpgsqlConnection(ConnectionString);
+            await using var dbConnection = new NpgsqlConnection(RepositorySettings.ConnectionString);
             return await dbConnection.ExecuteAsync(
-                @"UPDATE questions
-                SET questionText = @questionText,
-                    answerText = @answerText  
-                WHERE id = @id",
-                new
-                {
-                    questionText = parameters.QuestionText,
-                    answerText = parameters.AnswerText,
-                    id = parameters.QuestionId
-                });
+                new CommandDefinition(
+                    @"UPDATE questions
+                    SET questionText = @questionText,
+                        answerText = @answerText  
+                    WHERE id = @id",
+                    new
+                    {
+                        questionText = parameters.QuestionText,
+                        answerText = parameters.AnswerText,
+                        id = parameters.QuestionId
+                    },
+                    commandTimeout: RepositorySettings.TimeoutSeconds,
+                    cancellationToken: ct));
         }
 
+        /// <inheritdoc />
         public async Task<int> RemoveQuestion(
             long id,
             CancellationToken ct)
         {
-            await using var dbConnection = new NpgsqlConnection(ConnectionString);
+            await using var dbConnection = new NpgsqlConnection(RepositorySettings.ConnectionString);
             return await dbConnection.ExecuteAsync(
-                @"DELETE FROM questions
-                WHERE id = @id",
-                new { id });
+                new CommandDefinition(
+                    @"DELETE FROM questions
+                    WHERE id = @id",
+                    new { id },
+                    commandTimeout: RepositorySettings.TimeoutSeconds,
+                    cancellationToken: ct));
         }
 
+        /// <inheritdoc />
         public async Task<IEnumerable<QuestionDao>> GetSavedQuestions(
             long userId,
             CancellationToken ct)
         {
-            await using var dbConnection = new NpgsqlConnection(ConnectionString);
+            await using var dbConnection = new NpgsqlConnection(RepositorySettings.ConnectionString);
             return await dbConnection.QueryAsync<QuestionDao>(
-                @"SELECT
-                q.id as Id,
-                q.answerText as AnswerText,
-                q.questionText as QuestionText,
-                q.topicId as TopicId
-                FROM userQuestions uq
-                LEFT JOIN questions q ON uq.questionId = q.id
-                WHERE userId = @userId
-                ORDER BY q.id",
-                new { userId });
+                new CommandDefinition(
+                    @"SELECT
+                    q.id as Id,
+                    q.answerText as AnswerText,
+                    q.questionText as QuestionText,
+                    q.topicId as TopicId
+                    FROM userQuestions uq
+                    INNER JOIN questions q ON uq.questionId = q.id
+                    WHERE userId = @userId
+                    ORDER BY q.id",
+                    new { userId },
+                    commandTimeout: RepositorySettings.TimeoutSeconds,
+                    cancellationToken: ct));
         }
 
+        /// <inheritdoc />
         public async Task<int> SaveQuestion(
             SaveQuestionParameters parameters,
             CancellationToken ct)
         {
-            await using var dbConnection = new NpgsqlConnection(ConnectionString);
+            await using var dbConnection = new NpgsqlConnection(RepositorySettings.ConnectionString);
             return await dbConnection.ExecuteAsync(
-                @"INSERT INTO userQuestions
-                (userId, questionId) VALUES 
-                (@userId, @questionId)",
-                new
-                {
-                    userId = parameters.UserId,
-                    questionId = parameters.QuestionId
-                });
+                new CommandDefinition(
+                    @"INSERT INTO userQuestions
+                    (userId, questionId) VALUES 
+                    (@userId, @questionId)",
+                    new
+                    {
+                        userId = parameters.UserId,
+                        questionId = parameters.QuestionId
+                    },
+                    commandTimeout: RepositorySettings.TimeoutSeconds,
+                    cancellationToken: ct));
         }
 
+        /// <inheritdoc />
         public async Task<int> RemoveQuestionFromSaved(
             RemoveQuestionFromSavedParameters parameters,
             CancellationToken ct)
         {
-            await using var dbConnection = new NpgsqlConnection(ConnectionString);
+            await using var dbConnection = new NpgsqlConnection(RepositorySettings.ConnectionString);
             return await dbConnection.ExecuteAsync(
-                @"DELETE FROM userQuestions uq
-                WHERE userId = @userId
-                AND questionId = @questionId",
-                new
-                {
-                    userId = parameters.UserId,
-                    questionId = parameters.QuestionId
-                });
+                new CommandDefinition(
+                    @"DELETE FROM userQuestions uq
+                    WHERE userId = @userId
+                    AND questionId = @questionId",
+                    new
+                    {
+                        userId = parameters.UserId,
+                        questionId = parameters.QuestionId
+                    },
+                    commandTimeout: RepositorySettings.TimeoutSeconds,
+                    cancellationToken: ct));
         }
     }
 }

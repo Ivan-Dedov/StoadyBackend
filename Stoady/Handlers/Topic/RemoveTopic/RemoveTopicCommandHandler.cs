@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -33,7 +34,14 @@ namespace Stoady.Handlers.Topic.RemoveTopic
         {
             var topicId = request.TopicId;
 
-            await _topicRepository.RemoveTopic(topicId, ct);
+            var result = await _topicRepository.RemoveTopic(topicId, ct);
+
+            if (result != 1)
+            {
+                const string message = "Something went wrong when removing this topic. Please, try again.";
+                _logger.LogWarning(message);
+                throw new ApplicationException(message);
+            }
 
             return Unit.Value;
         }

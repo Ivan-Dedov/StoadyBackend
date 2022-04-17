@@ -38,16 +38,16 @@ namespace Stoady.Controllers
         /// Получить вопросы, относящиеся к теме
         /// </summary>
         /// <param name="topicId">ID темы</param>
-        /// <param name="token"></param>
+        /// <param name="ct"></param>
         /// <returns></returns>
         [HttpGet("{topicId:long:min(1)}")]
         public async Task<GetQuestionsResponse> GetQuestions(
             long topicId,
-            CancellationToken token)
+            CancellationToken ct)
         {
             var command = new GetQuestionsCommand(topicId);
 
-            var result = await _mediator.Send(command, token);
+            var result = await _mediator.Send(command, ct);
 
             return result;
         }
@@ -56,16 +56,16 @@ namespace Stoady.Controllers
         /// Получить вопросы пользователя, добавленные в сохраненные
         /// </summary>
         /// <param name="userId">ID пользователя</param>
-        /// <param name="token"></param>
+        /// <param name="ct"></param>
         /// <returns></returns>
         [HttpGet("saved/{userId:long:min(1)}")]
         public async Task<GetSavedQuestionsResponse> GetSavedQuestions(
             long userId,
-            CancellationToken token)
+            CancellationToken ct)
         {
             var command = new GetSavedQuestionsCommand(userId);
 
-            var result = await _mediator.Send(command, token);
+            var result = await _mediator.Send(command, ct);
 
             return result;
         }
@@ -74,19 +74,19 @@ namespace Stoady.Controllers
         /// Добавить новый вопрос
         /// </summary>
         /// <param name="request"></param>
-        /// <param name="token"></param>
+        /// <param name="ct"></param>
         /// <returns></returns>
         [HttpPost("add")]
         public async Task<IActionResult> AddQuestion(
             AddQuestionRequest request,
-            CancellationToken token)
+            CancellationToken ct)
         {
             var command = new AddQuestionCommand(
                 request.TopicId,
                 request.QuestionText,
                 request.AnswerText);
 
-            await _mediator.Send(command, token);
+            await _mediator.Send(command, ct);
 
             return Ok();
         }
@@ -96,20 +96,20 @@ namespace Stoady.Controllers
         /// </summary>
         /// <param name="questionId">ID вопроса</param>
         /// <param name="request"></param>
-        /// <param name="token"></param>
+        /// <param name="ct"></param>
         /// <returns></returns>
         [HttpPost("edit/{questionId:long:min(1)}")]
         public async Task<IActionResult> EditQuestion(
             long questionId,
             [FromBody] EditQuestionRequest request,
-            CancellationToken token)
+            CancellationToken ct)
         {
             var command = new EditQuestionCommand(
                 questionId,
                 request.QuestionText,
                 request.AnswerText);
 
-            await _mediator.Send(command, token);
+            await _mediator.Send(command, ct);
 
             return Ok();
         }
@@ -119,19 +119,19 @@ namespace Stoady.Controllers
         /// </summary>
         /// <param name="userId">ID пользователя</param>
         /// <param name="questionId">ID вопроса</param>
-        /// <param name="token"></param>
+        /// <param name="ct"></param>
         /// <returns></returns>
         [HttpPut("save/{questionId:long:min(1)}")]
         public async Task<IActionResult> SaveQuestion(
             long questionId,
             [FromHeader] long userId,
-            CancellationToken token)
+            CancellationToken ct)
         {
             var command = new SaveQuestionCommand(
                 userId,
                 questionId);
 
-            await _mediator.Send(command, token);
+            await _mediator.Send(command, ct);
 
             return Ok();
         }
@@ -140,16 +140,16 @@ namespace Stoady.Controllers
         /// Удалить вопрос
         /// </summary>
         /// <param name="questionId">ID вопроса</param>
-        /// <param name="token"></param>
+        /// <param name="ct"></param>
         /// <returns></returns>
         [HttpDelete("remove/{questionId:long:min(1)}")]
         public async Task<IActionResult> RemoveQuestion(
             long questionId,
-            CancellationToken token)
+            CancellationToken ct)
         {
             var command = new RemoveQuestionCommand(questionId);
 
-            await _mediator.Send(command, token);
+            await _mediator.Send(command, ct);
 
             return Ok();
         }
@@ -159,19 +159,19 @@ namespace Stoady.Controllers
         /// </summary>
         /// <param name="userId">ID пользователя</param>
         /// <param name="questionId">ID вопроса</param>
-        /// <param name="token"></param>
+        /// <param name="ct"></param>
         /// <returns></returns>
         [HttpDelete("unsave/{questionId:long:min(1)}")]
         public async Task<IActionResult> RemoveSavedQuestion(
             long questionId,
             [FromHeader] long userId,
-            CancellationToken token)
+            CancellationToken ct)
         {
             var command = new RemoveSavedQuestionCommand(
                 userId,
                 questionId);
 
-            await _mediator.Send(command, token);
+            await _mediator.Send(command, ct);
 
             return Ok();
         }

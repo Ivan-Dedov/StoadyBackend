@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -36,7 +37,7 @@ namespace Stoady.Handlers.Subject.EditSubject
         {
             var (subjectId, subjectName, subjectDescription) = request;
 
-            await _subjectRepository.EditSubject(
+            var result = await _subjectRepository.EditSubject(
                 new EditSubjectParameters
                 {
                     SubjectId = subjectId,
@@ -44,6 +45,13 @@ namespace Stoady.Handlers.Subject.EditSubject
                     SubjectDescription = subjectDescription
                 },
                 ct);
+
+            if (result != 1)
+            {
+                const string message = "Something went wrong when editing the subject. Please, try again.";
+                _logger.LogWarning(message);
+                throw new ApplicationException(message);
+            }
 
             return Unit.Value;
         }

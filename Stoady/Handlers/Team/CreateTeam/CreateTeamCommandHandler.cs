@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -38,7 +39,7 @@ namespace Stoady.Handlers.Team.CreateTeam
         {
             var (userId, teamName) = request;
 
-            await _teamRepository.CreateTeam(
+            var result = await _teamRepository.CreateTeam(
                 new CreateTeamParameters
                 {
                     TeamName = teamName,
@@ -47,14 +48,21 @@ namespace Stoady.Handlers.Team.CreateTeam
                 },
                 ct);
 
-            await _teamRepository.AddMember(
+            var addCreatorResult = await _teamRepository.AddMember(
                 new AddMemberParameters
                 {
-                    RoleId = (long)Role.Creator,
+                    RoleId = (long) Role.Creator,
                     TeamId = (await _teamRepository.GetTeamByNameAndCreator(teamName, userId, ct)).Id,
                     UserId = userId
                 },
                 ct);
+
+            if (result != 1 || addCreatorResult != 1)
+            {
+                const string message = "Something went wrong when creating the team. Please, try again.";
+                _logger.LogWarning(message);
+                throw new ApplicationException(message);
+            }
 
             return Unit.Value;
         }

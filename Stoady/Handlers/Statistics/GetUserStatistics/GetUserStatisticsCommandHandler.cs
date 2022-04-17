@@ -1,8 +1,11 @@
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 using MediatR;
+
+using Microsoft.Extensions.Logging;
 
 using Stoady.DataAccess.Repositories.Interfaces;
 using Stoady.Models.Handlers.Statistics.GetUserStatistics;
@@ -17,11 +20,14 @@ namespace Stoady.Handlers.Statistics.GetUserStatistics
         : IRequestHandler<GetUserStatisticsCommand, GetUserStatisticsResponse>
     {
         private readonly IStatisticsRepository _statisticsRepository;
+        private readonly ILogger<GetUserStatisticsCommandHandler> _logger;
 
         public GetUserStatisticsCommandHandler(
-            IStatisticsRepository statisticsRepository)
+            IStatisticsRepository statisticsRepository,
+            ILogger<GetUserStatisticsCommandHandler> logger)
         {
             _statisticsRepository = statisticsRepository;
+            _logger = logger;
         }
 
         public async Task<GetUserStatisticsResponse> Handle(
@@ -30,9 +36,17 @@ namespace Stoady.Handlers.Statistics.GetUserStatistics
         {
             var userId = request.UserId;
 
-            var results = (await _statisticsRepository
-                    .GetStatisticsByUserId(userId, ct))
-                .Select(s => new TopicStatistics
+            var statistics = await _statisticsRepository
+                .GetStatisticsByUserId(userId, ct);
+
+            if (statistics is null)
+            {
+                var message = $"User with ID = {userId} was not found";
+                _logger.LogWarning(message);
+                throw new ApplicationException(message);
+            }
+
+            var result = statistics.Select(s => new TopicStatistics
                 {
                     TopicId = s.TopicId,
                     TopicName = s.TopicName,
@@ -42,7 +56,7 @@ namespace Stoady.Handlers.Statistics.GetUserStatistics
 
             return new GetUserStatisticsResponse
             {
-                Results = results
+                Results = result
             };
         }
     }

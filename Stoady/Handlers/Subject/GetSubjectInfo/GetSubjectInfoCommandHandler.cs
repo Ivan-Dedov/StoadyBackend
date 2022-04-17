@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -45,6 +46,13 @@ namespace Stoady.Handlers.Subject.GetSubjectInfo
 
             var subject = subjectTask.Result;
             var topics = topicsTask.Result;
+
+            if (subject is null || topics is null)
+            {
+                var message = $"Could not find subject with ID = {subjectId}";
+                _logger.LogError(message);
+                throw new ApplicationException(message);
+            }
 
             return new GetSubjectInfoResponse
             {

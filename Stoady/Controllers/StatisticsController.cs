@@ -29,16 +29,16 @@ namespace Stoady.Controllers
         /// Получить процент выполнения темы пользователем
         /// </summary>
         /// <param name="userId">ID пользователя</param>
-        /// <param name="token"></param>
+        /// <param name="ct"></param>
         /// <returns></returns>
         [HttpGet("{userId:long:min(1)}")]
         public async Task<GetUserStatisticsResponse> GetUserStatistics(
             long userId,
-            CancellationToken token)
+            CancellationToken ct)
         {
             var command = new GetUserStatisticsCommand(userId);
 
-            var result = await _mediator.Send(command, token);
+            var result = await _mediator.Send(command, ct);
 
             return result;
         }

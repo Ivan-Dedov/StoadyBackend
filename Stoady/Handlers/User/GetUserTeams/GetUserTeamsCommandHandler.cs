@@ -42,25 +42,44 @@ namespace Stoady.Handlers.User.GetUserTeams
 
             var teams = await _userRepository.GetTeamsByUserId(userId, ct);
 
-            var userTeamsTasks = teams
-                .Select(async x =>
-                    new UserTeam
-                    {
-                        TeamId = x.Id,
-                        Role = Enum.Parse<Role>((await _roleRepository.GetUserRoleByTeamId(userId, x.Id, ct)).Name),
-                        TeamName = x.Name,
-                        TeamAvatar = x.Avatar
-                    })
-                .ToList();
-
-            await Task.WhenAll(userTeamsTasks);
-
-            var result = userTeamsTasks.Select(x => x.Result).ToList();
-
-            return new GetUserTeamsResponse
+            if (teams is null)
             {
-                Teams = result
-            };
+                var message = $"Could not find teams of user with ID = {userId}";
+                _logger.LogError(message);
+                throw new ApplicationException(message);
+            }
+
+            try
+            {
+                var userTeamsTasks = teams
+                    .Select(async x =>
+                        new UserTeam
+                        {
+                            TeamId = x.Id,
+                            Role = Enum.Parse<Role>((await _roleRepository.GetUserRoleByTeamId(userId, x.Id, ct)).Name),
+                            TeamName = x.Name,
+                            TeamAvatar = x.Avatar
+                        })
+                    .ToList();
+
+                await Task.WhenAll(userTeamsTasks);
+
+                var result = userTeamsTasks
+                    .Select(x => x.Result)
+                    .ToList();
+
+                return new GetUserTeamsResponse
+                {
+                    Teams = result
+                };
+            }
+            catch (Exception ex)
+            {
+                var message =
+                    $"Something went wrong while trying to get information about the teams of user with ID = {userId}.";
+                _logger.LogError(message + Environment.NewLine + ex.Message);
+                throw new ApplicationException(message);
+            }
         }
     }
 }

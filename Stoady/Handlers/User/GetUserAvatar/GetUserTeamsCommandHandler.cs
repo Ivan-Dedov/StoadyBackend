@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -22,8 +23,7 @@ namespace Stoady.Handlers.User.GetUserAvatar
 
         public GetUserAvatarCommandHandler(
             ILogger<GetUserAvatarCommandHandler> logger,
-            IUserRepository userRepository,
-            IRoleRepository roleRepository)
+            IUserRepository userRepository)
         {
             _logger = logger;
             _userRepository = userRepository;
@@ -36,6 +36,13 @@ namespace Stoady.Handlers.User.GetUserAvatar
             var userId = request.UserId;
 
             var user = await _userRepository.GetUserById(userId, ct);
+
+            if (user is null)
+            {
+                var message = $"Could not find user with ID = {userId}.";
+                _logger.LogWarning(message);
+                throw new ApplicationException(message);
+            }
 
             return new GetUserAvatarResponse
             {

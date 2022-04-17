@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -36,7 +37,7 @@ namespace Stoady.Handlers.Topic.EditTopic
         {
             var (topicId, topicName, topicDescription) = request;
 
-            await _topicRepository.EditTopic(
+            var result = await _topicRepository.EditTopic(
                 new EditTopicParameters
                 {
                     TopicId = topicId,
@@ -44,6 +45,13 @@ namespace Stoady.Handlers.Topic.EditTopic
                     TopicDescription = topicDescription
                 },
                 ct);
+
+            if (result != 1)
+            {
+                const string message = "Something went wrong when editing this topic. Please, try again.";
+                _logger.LogWarning(message);
+                throw new ApplicationException(message);
+            }
 
             return Unit.Value;
         }

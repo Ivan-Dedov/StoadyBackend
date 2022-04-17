@@ -9,20 +9,21 @@ using Npgsql;
 using Stoady.DataAccess.Models.Dao;
 using Stoady.DataAccess.Models.Parameters;
 using Stoady.DataAccess.Repositories.Interfaces;
+using Stoady.DataAccess.Repositories.Settings;
 
 namespace Stoady.DataAccess.Repositories
 {
     public sealed class UserRepository : IUserRepository
     {
-        private const string ConnectionString = "Server=ec2-52-211-158-144.eu-west-1.compute.amazonaws.com;Port=5432;Database=d9elrdlh8nmq04;Username=rxxaapxbpdyrlk;Password=97ecec32a181a8066f081d64aef963e0dda3c6cda9f3b6af4d19e73d5ca14a01";
-
+        /// <inheritdoc />
         public async Task<UserDao> GetUserById(
             long id,
             CancellationToken ct)
         {
-            await using var dbConnection = new NpgsqlConnection(ConnectionString);
+            await using var dbConnection = new NpgsqlConnection(RepositorySettings.ConnectionString);
             return await dbConnection.QuerySingleOrDefaultAsync<UserDao>(
-                @"SELECT 
+                new CommandDefinition(
+                    @"SELECT 
                     u.id as Id,
                     u.username as Username,
                     u.email as Email,
@@ -31,17 +32,21 @@ namespace Stoady.DataAccess.Repositories
                     u.avatarId as AvatarId
                     FROM users u
                     WHERE u.Id = @id",
-                new { id });
+                    new { id },
+                    commandTimeout: RepositorySettings.TimeoutSeconds,
+                    cancellationToken: ct));
         }
 
+        /// <inheritdoc />
         public async Task<UserDao> GetUser(
             string email,
             string password,
             CancellationToken ct)
         {
-            await using var dbConnection = new NpgsqlConnection(ConnectionString);
+            await using var dbConnection = new NpgsqlConnection(RepositorySettings.ConnectionString);
             return await dbConnection.QuerySingleOrDefaultAsync<UserDao>(
-                @"SELECT 
+                new CommandDefinition(
+                    @"SELECT 
                     u.id as Id,
                     u.username as Username,
                     u.email as Email,
@@ -51,16 +56,20 @@ namespace Stoady.DataAccess.Repositories
                     FROM users u
                     WHERE email = @email 
                     AND password = @password",
-                new { email, password });
+                    new { email, password },
+                    commandTimeout: RepositorySettings.TimeoutSeconds,
+                    cancellationToken: ct));
         }
 
+        /// <inheritdoc />
         public async Task<UserDao> GetUserByEmail(
             string email,
             CancellationToken ct)
         {
-            await using var dbConnection = new NpgsqlConnection(ConnectionString);
+            await using var dbConnection = new NpgsqlConnection(RepositorySettings.ConnectionString);
             return await dbConnection.QuerySingleOrDefaultAsync<UserDao>(
-                @"SELECT
+                new CommandDefinition(
+                    @"SELECT
                     u.id as Id,
                     u.username as Username,
                     u.email as Email,
@@ -69,16 +78,20 @@ namespace Stoady.DataAccess.Repositories
                     u.avatarId as AvatarId
                     FROM users u
                     WHERE email = @email",
-                new { email });
+                    new { email },
+                    commandTimeout: RepositorySettings.TimeoutSeconds,
+                    cancellationToken: ct));
         }
 
+        /// <inheritdoc />
         public async Task<UserWithPasswordDao> GetUserWithPasswordByEmail(
             string email,
             CancellationToken ct)
         {
-            await using var dbConnection = new NpgsqlConnection(ConnectionString);
+            await using var dbConnection = new NpgsqlConnection(RepositorySettings.ConnectionString);
             return await dbConnection.QuerySingleOrDefaultAsync<UserWithPasswordDao>(
-                @"SELECT
+                new CommandDefinition(
+                    @"SELECT
                     u.id as Id,
                     u.username as Username,
                     u.email as Email,
@@ -89,58 +102,72 @@ namespace Stoady.DataAccess.Repositories
                     u.salt as Salt
                     FROM users u
                     WHERE email = @email",
-                new { email });
+                    new { email },
+                    commandTimeout: RepositorySettings.TimeoutSeconds,
+                    cancellationToken: ct));
         }
 
+        /// <inheritdoc />
         public async Task<int> AddUser(
             AddUserParameters parameters,
             CancellationToken ct)
         {
-            await using var dbConnection = new NpgsqlConnection(ConnectionString);
+            await using var dbConnection = new NpgsqlConnection(RepositorySettings.ConnectionString);
             return await dbConnection.ExecuteAsync(
-                @"INSERT INTO users
-                (username, email, password, avatarId, salt) VALUES 
-                (@username, @email, @password, @avatarId, @salt)",
-                new
-                {
-                    username = parameters.Username,
-                    email = parameters.Email,
-                    password = parameters.Password,
-                    avatarId = parameters.AvatarId,
-                    salt = parameters.Salt
-                });
+                new CommandDefinition(
+                    @"INSERT INTO users
+                    (username, email, password, avatarId, salt) VALUES 
+                    (@username, @email, @password, @avatarId, @salt)",
+                    new
+                    {
+                        username = parameters.Username,
+                        email = parameters.Email,
+                        password = parameters.Password,
+                        avatarId = parameters.AvatarId,
+                        salt = parameters.Salt
+                    },
+                    commandTimeout: RepositorySettings.TimeoutSeconds,
+                    cancellationToken: ct));
         }
 
+        /// <inheritdoc />
         public async Task<int> ChangeUserAvatarById(
             ChangeUserAvatarParameters parameters,
             CancellationToken ct)
         {
-            await using var dbConnection = new NpgsqlConnection(ConnectionString);
+            await using var dbConnection = new NpgsqlConnection(RepositorySettings.ConnectionString);
             return await dbConnection.ExecuteAsync(
-                @"UPDATE users
-                SET avatarId = @avatarId
-                WHERE id = @id",
-                new
-                {
-                    id = parameters.UserId,
-                    avatarId = parameters.AvatarId
-                });
+                new CommandDefinition(
+                    @"UPDATE users
+                    SET avatarId = @avatarId
+                    WHERE id = @id",
+                    new
+                    {
+                        id = parameters.UserId,
+                        avatarId = parameters.AvatarId
+                    },
+                    commandTimeout: RepositorySettings.TimeoutSeconds,
+                    cancellationToken: ct));
         }
 
+        /// <inheritdoc />
         public async Task<IEnumerable<TeamDao>> GetTeamsByUserId(
             long userId,
             CancellationToken ct)
         {
-            await using var dbConnection = new NpgsqlConnection(ConnectionString);
+            await using var dbConnection = new NpgsqlConnection(RepositorySettings.ConnectionString);
             return await dbConnection.QueryAsync<TeamDao>(
-                @"SELECT 
+                new CommandDefinition(
+                    @"SELECT 
                     t.id as Id,
                     t.name as Name,
                     t.avatar as Avatar
                     FROM teamUsers tu
-                    LEFT JOIN teams t ON tu.teamId = t.id
+                    INNER JOIN teams t ON tu.teamId = t.id
                     WHERE tu.userId = @userId",
-                new { userId });
+                    new { userId },
+                    commandTimeout: RepositorySettings.TimeoutSeconds,
+                    cancellationToken: ct));
         }
     }
 }

@@ -29,19 +29,19 @@ namespace Stoady.Controllers
         /// Сохранить результаты тестирования
         /// </summary>
         /// <param name="request"></param>
-        /// <param name="token"></param>
+        /// <param name="ct"></param>
         /// <returns></returns>
         [HttpPost]
         public async Task<IActionResult> SaveTestResults(
             [FromBody] SaveTestResultsRequest request,
-            CancellationToken token)
+            CancellationToken ct)
         {
             var command = new SaveTestResultsCommand(
                 request.UserId,
                 request.TopicId,
                 request.Result);
 
-            await _mediator.Send(command, token);
+            await _mediator.Send(command, ct);
 
             return Ok();
         }

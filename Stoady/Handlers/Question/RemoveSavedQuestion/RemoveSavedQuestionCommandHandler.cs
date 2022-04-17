@@ -36,13 +36,20 @@ namespace Stoady.Handlers.Question.RemoveSavedQuestion
         {
             var (userId, questionId) = request;
 
-            await _questionRepository.RemoveQuestionFromSaved(
+            var result = await _questionRepository.RemoveQuestionFromSaved(
                 new RemoveQuestionFromSavedParameters
                 {
                     UserId = userId,
                     QuestionId = questionId
                 },
                 ct);
+
+            if (result != 1)
+            {
+                const string message = "Something went wrong when unsaving this question. Please, try again.";
+                _logger.LogWarning(message);
+                throw new ApplicationException(message);
+            }
 
             return Unit.Value;
         }

@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -36,7 +37,7 @@ namespace Stoady.Handlers.Topic.AddTopic
         {
             var (subjectId, topicName, topicDescription) = request;
 
-            await _topicRepository.AddTopic(
+            var result = await _topicRepository.AddTopic(
                 new AddTopicParameters
                 {
                     SubjectId = subjectId,
@@ -45,6 +46,12 @@ namespace Stoady.Handlers.Topic.AddTopic
                 },
                 ct);
 
+            if (result != 1)
+            {
+                const string message = "Something went wrong when creating this topic. Please, try again.";
+                _logger.LogWarning(message);
+                throw new ApplicationException(message);
+            }
             return Unit.Value;
         }
     }

@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -36,7 +37,7 @@ namespace Stoady.Handlers.Question.EditQuestion
         {
             var (questionId, questionText, answerText) = request;
 
-            await _questionRepository.EditQuestion(
+            var result = await _questionRepository.EditQuestion(
                 new EditQuestionParameters
                 {
                     QuestionId = questionId,
@@ -44,6 +45,13 @@ namespace Stoady.Handlers.Question.EditQuestion
                     QuestionText = questionText
                 },
                 ct);
+
+            if (result != 1)
+            {
+                const string message = "Something went wrong when editing the question. Please, try again.";
+                _logger.LogWarning(message);
+                throw new ApplicationException(message);
+            }
 
             return Unit.Value;
         }

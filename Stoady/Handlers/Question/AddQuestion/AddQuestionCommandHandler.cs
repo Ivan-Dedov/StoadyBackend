@@ -40,14 +40,14 @@ namespace Stoady.Handlers.Question.AddQuestion
         {
             var (topicId, questionText, answerText) = request;
 
-            if (_topicRepository.GetTopicById(topicId, ct) is null)
+            if (await _topicRepository.GetTopicById(topicId, ct) is null)
             {
                 var message = $"Could not find topic with ID = {topicId}";
                 _logger.LogWarning(message);
                 throw new ApplicationException(message);
             }
 
-            await _questionRepository.AddQuestion(
+            var result = await _questionRepository.AddQuestion(
                 new AddQuestionParameters
                 {
                     TopicId = topicId,
@@ -55,6 +55,13 @@ namespace Stoady.Handlers.Question.AddQuestion
                     QuestionText = questionText
                 },
                 ct);
+
+            if (result != 1)
+            {
+                const string message = "Something went wrong when creating the question. Please, try again.";
+                _logger.LogWarning(message);
+                throw new ApplicationException(message);
+            }
 
             return Unit.Value;
         }

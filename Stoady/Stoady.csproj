@@ -24,4 +24,10 @@
       <ProjectReference Include="..\Stoady.DataAccess\Stoady.DataAccess.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Content Update="appsettings.Development.json">
+        <DependentUpon>appsettings.json</DependentUpon>
+      </Content>
+    </ItemGroup>
+
 </Project>

@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -45,6 +46,13 @@ namespace Stoady.Handlers.Topic.GetTopicInfo
 
             var topic = topicTask.Result;
             var questions = questionsTask.Result;
+
+            if (topic is null || questions is null)
+            {
+                var message = $"Could not find topic with ID = {topicId}";
+                _logger.LogError(message);
+                throw new ApplicationException(message);
+            }
 
             return new GetTopicInfoResponse
             {

@@ -50,7 +50,7 @@ namespace Stoady.Handlers.User.RegisterUser
 
             var (hashedPassword, salt) = _passwordValidatorService.GetHashedPassword(password);
 
-            await _userRepository.AddUser(
+            var result = await _userRepository.AddUser(
                 new AddUserParameters
                 {
                     Username = username,
@@ -61,12 +61,28 @@ namespace Stoady.Handlers.User.RegisterUser
                 },
                 ct);
 
+            if (result != 1)
+            {
+                const string message = "Something went wrong when registering. Please, try again.";
+                _logger.LogWarning(message);
+                throw new ApplicationException(message);
+            }
+
             _logger.LogInformation($"User with email {email} successfully registered");
 
-            return new RegisterUserResponse
+            try
             {
-                UserId = (await _userRepository.GetUserByEmail(email, ct)).Id
-            };
+                return new RegisterUserResponse
+                {
+                    UserId = (await _userRepository.GetUserByEmail(email, ct)).Id
+                };
+            }
+            catch (Exception ex)
+            {
+                var message = "Something went wrong when registering." + Environment.NewLine + ex.Message;
+                _logger.LogError(message);
+                throw new ApplicationException(message);
+            }
         }
 
         private async Task<bool> CheckUserAlreadyExists(

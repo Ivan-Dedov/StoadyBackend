@@ -10,7 +10,8 @@ namespace Stoady.Handlers.Team.RemoveMember
                 .GreaterThan(0);
 
             RuleFor(x => x.UserId)
-                .GreaterThan(0);
+                .GreaterThan(0)
+                .NotEqual(x => x.ExecutorId); // TODO: Возможно, стоит оставить это для возможности выйти из команды?
         }
     }
 }
