@@ -4,7 +4,8 @@ namespace Stoady.Handlers.User.RegisterUser
 {
     public class RegisterUserCommandValidator : AbstractValidator<RegisterUserCommand>
     {
-        private const int HashedPasswordLength = 64;
+        private const int MinPasswordLength = 5;
+        private const int MaxPasswordLength = 30;
 
         public RegisterUserCommandValidator()
         {
@@ -14,8 +15,9 @@ namespace Stoady.Handlers.User.RegisterUser
             RuleFor(x => x.Username)
                 .NotEmpty();
 
-            RuleFor(x => x.Password)
-                .Length(HashedPasswordLength);
+            RuleFor(x => x.Password.Length)
+                .GreaterThanOrEqualTo(MinPasswordLength)
+                .LessThanOrEqualTo(MaxPasswordLength);
         }
     }
 }
