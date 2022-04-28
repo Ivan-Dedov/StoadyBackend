@@ -10,7 +10,8 @@ namespace Stoady.Handlers.Team.AddMember
                 .GreaterThan(0);
 
             RuleFor(x => x.Email)
-                .NotEmpty();
+                .NotEmpty()
+                .EmailAddress();
         }
     }
 }
