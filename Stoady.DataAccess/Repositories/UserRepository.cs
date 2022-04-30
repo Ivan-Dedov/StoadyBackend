@@ -27,8 +27,6 @@ namespace Stoady.DataAccess.Repositories
                     u.id as Id,
                     u.username as Username,
                     u.email as Email,
-                    u.refreshToken as RefreshToken,
-                    u.refreshTokenExpiryTime as RefreshTokenExpiryTime,
                     u.avatarId as AvatarId
                     FROM users u
                     WHERE u.Id = @id",
@@ -50,8 +48,6 @@ namespace Stoady.DataAccess.Repositories
                     u.id as Id,
                     u.username as Username,
                     u.email as Email,
-                    u.refreshToken as RefreshToken,
-                    u.refreshTokenExpiryTime as RefreshTokenExpiryTime,
                     u.avatarId as AvatarId
                     FROM users u
                     WHERE email = @email 
@@ -73,8 +69,6 @@ namespace Stoady.DataAccess.Repositories
                     u.id as Id,
                     u.username as Username,
                     u.email as Email,
-                    u.refreshToken as RefreshToken,
-                    u.refreshTokenExpiryTime as RefreshTokenExpiryTime,
                     u.avatarId as AvatarId
                     FROM users u
                     WHERE email = @email",
@@ -95,8 +89,6 @@ namespace Stoady.DataAccess.Repositories
                     u.id as Id,
                     u.username as Username,
                     u.email as Email,
-                    u.refreshToken as RefreshToken,
-                    u.refreshTokenExpiryTime as RefreshTokenExpiryTime,
                     u.avatarId as AvatarId,
                     u.password as Password,
                     u.salt as Salt

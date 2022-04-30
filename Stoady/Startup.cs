@@ -86,8 +86,6 @@ namespace Stoady
             services.AddTransient<ExceptionHandlingMiddleware>();
 
             // Services
-            services.AddTransient<ITokenService, TokenService>();
-            services.AddTransient<IClaimService, ClaimService>();
             services.AddTransient<IPasswordValidatorService, PasswordValidatorService>();
             services.AddScoped<IRightsValidatorService, RightsValidatorService>();
 

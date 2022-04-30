@@ -7,13 +7,16 @@ namespace Stoady.Handlers.Question.EditQuestion
         private const int MinQuestionLength = 1;
         private const int MaxQuestionLength = 100;
 
+        private const int MinAnswerLength = 1;
+        private const int MaxAnswerLength = 100;
+
         public EditQuestionCommandValidator()
         {
             RuleFor(x => x.QuestionText)
                 .Length(MinQuestionLength, MaxQuestionLength);
 
             RuleFor(x => x.AnswerText)
-                .Length(MinQuestionLength, MaxQuestionLength);
+                .Length(MinAnswerLength, MaxAnswerLength);
         }
     }
 }

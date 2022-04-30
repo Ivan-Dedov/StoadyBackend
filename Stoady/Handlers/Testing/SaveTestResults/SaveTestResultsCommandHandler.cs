@@ -1,8 +1,11 @@
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 using MediatR;
+
+using Microsoft.Extensions.Logging;
 
 using Stoady.DataAccess.Models.Parameters;
 using Stoady.DataAccess.Repositories.Interfaces;
@@ -19,11 +22,14 @@ namespace Stoady.Handlers.Testing.SaveTestResults
         : IRequestHandler<SaveTestResultsCommand, Unit>
     {
         private readonly IStatisticsRepository _statisticsRepository;
+        private readonly ILogger<SaveTestResultsCommandHandler> _logger;
 
         public SaveTestResultsCommandHandler(
-            IStatisticsRepository statisticsRepository)
+            IStatisticsRepository statisticsRepository,
+            ILogger<SaveTestResultsCommandHandler> logger)
         {
             _statisticsRepository = statisticsRepository;
+            _logger = logger;
         }
 
         public async Task<Unit> Handle(
@@ -35,27 +41,38 @@ namespace Stoady.Handlers.Testing.SaveTestResults
             var existingStatistics = await _statisticsRepository
                 .GetStatisticsByUserId(userId, ct);
 
-            if (existingStatistics.Any(s => s.TopicId == topicId))
+            try
             {
-                await _statisticsRepository.EditStatistics(
-                    new EditStatisticsParameters
-                    {
-                        TopicId = topicId,
-                        UserId = userId,
-                        Result = result
-                    },
-                    ct);
+                if (existingStatistics.Any(s => s.TopicId == topicId))
+                {
+                    await _statisticsRepository.EditStatistics(
+                        new EditStatisticsParameters
+                        {
+                            TopicId = topicId,
+                            UserId = userId,
+                            Result = result
+                        },
+                        ct);
+                }
+                else
+                {
+                    await _statisticsRepository.AddStatistics(
+                        new AddStatisticsParameters
+                        {
+                            TopicId = topicId,
+                            UserId = userId,
+                            Result = result
+                        },
+                        ct);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                await _statisticsRepository.AddStatistics(
-                    new AddStatisticsParameters
-                    {
-                        TopicId = topicId,
-                        UserId = userId,
-                        Result = result
-                    },
-                    ct);
+                var message =
+                    $"Exception occurred when saving statistics for user with ID = {userId} and " +
+                    $"topic with ID = {topicId}: {ex.Message}";
+                _logger.LogError(message);
+                throw new ApplicationException(message);
             }
 
             return Unit.Value;

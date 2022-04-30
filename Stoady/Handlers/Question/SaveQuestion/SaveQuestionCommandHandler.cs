@@ -36,17 +36,26 @@ namespace Stoady.Handlers.Question.SaveQuestion
         {
             var (userId, questionId) = request;
 
-            var result = await _questionRepository.SaveQuestion(
-                new SaveQuestionParameters
-                {
-                    UserId = userId,
-                    QuestionId = questionId
-                },
-                ct);
-
-            if (result != 1)
+            try
             {
-                const string message = "Something went wrong when saving this question. Please, try again.";
+                var result = await _questionRepository.SaveQuestion(
+                    new SaveQuestionParameters
+                    {
+                        UserId = userId,
+                        QuestionId = questionId
+                    },
+                    ct);
+
+                if (result != 1)
+                {
+                    const string message = "Something went wrong when saving this question. Please, try again.";
+                    _logger.LogWarning(message);
+                    throw new ApplicationException(message);
+                }
+            }
+            catch (Exception ex)
+            {
+                var message = $"Something went wrong when saving this question: {ex.Message}";
                 _logger.LogWarning(message);
                 throw new ApplicationException(message);
             }

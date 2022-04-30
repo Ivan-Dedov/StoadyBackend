@@ -6,7 +6,6 @@ using MediatR;
 
 using Microsoft.AspNetCore.Mvc;
 
-using Stoady.Handlers.Authentication.Authenticate;
 using Stoady.Handlers.Authentication.Authorization;
 using Stoady.Models.Handlers.Authentication;
 
@@ -28,30 +27,7 @@ namespace Stoady.Controllers
         }
 
         /// <summary>
-        /// Аутентифицировать пользователя по почте и паролю
-        /// </summary>
-        [HttpPost]
-        public async Task<ActionResult<AuthenticationResponse>> Authenticate(
-            [FromBody] AuthenticationRequest request,
-            CancellationToken ct)
-        {
-            var command = new AuthenticationCommand(
-                request.Email,
-                request.Password);
-
-            try
-            {
-                var result = await _mediator.Send(command, ct);
-                return Ok(result);
-            }
-            catch (ApplicationException)
-            {
-                return Unauthorized();
-            }
-        }
-
-        /// <summary>
-        /// Авторизовать пользователя по почте и паролю (временная упрощенная ручка)
+        /// Авторизовать пользователя по почте и паролю
         /// </summary>
         [HttpPost("authorize")]
         public async Task<ActionResult<AuthorizationResponse>> Authenticate(

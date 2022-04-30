@@ -70,8 +70,6 @@ namespace Stoady.DataAccess.Repositories
                     u.id as Id,
                     u.username as Username,
                     u.email as Email,
-                    u.refreshToken as RefreshToken,
-                    u.refreshTokenExpiryTime as RefreshTokenExpiryTime,
                     u.password as Password,
                     u.avatarId as AvatarId
                     FROM teamUsers tu
