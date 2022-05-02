@@ -16,26 +16,6 @@ namespace Stoady.DataAccess.Repositories
     public sealed class QuestionRepository : IQuestionRepository
     {
         /// <inheritdoc />
-        public async Task<QuestionDao> GetQuestionById(
-            long id,
-            CancellationToken ct)
-        {
-            await using var dbConnection = new NpgsqlConnection(RepositorySettings.ConnectionString);
-            return await dbConnection.QuerySingleOrDefaultAsync<QuestionDao>(
-                new CommandDefinition(
-                    @"SELECT
-                    q.id as Id,
-                    q.answerText as AnswerText,
-                    q.questionText as QuestionText,
-                    q.topicId as TopicId
-                    FROM questions q
-                    WHERE id = @id",
-                    new { id },
-                    commandTimeout: RepositorySettings.TimeoutSeconds,
-                    cancellationToken: ct));
-        }
-
-        /// <inheritdoc />
         public async Task<IEnumerable<QuestionDao>> GetQuestionsByTopicId(
             long topicId,
             CancellationToken ct)

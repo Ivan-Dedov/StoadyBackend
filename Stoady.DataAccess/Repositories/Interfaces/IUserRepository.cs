@@ -10,24 +10,16 @@ namespace Stoady.DataAccess.Repositories.Interfaces
     public interface IUserRepository
     {
         /// <summary>
-        /// Получает пользователя по его ID
+        /// Получает пользователя по его идентификатору
         /// </summary>
         Task<UserDao> GetUserById(
-            long id,
-            CancellationToken ct);
-
-        /// <summary>
-        /// Получает пользователя по почте и захэшированному паролю
-        /// </summary>
-        Task<UserDao> GetUser(
-            string email,
-            string password,
+            long userId,
             CancellationToken ct);
 
         /// <summary>
         /// Получает пользователя с паролем по адресу почты
         /// </summary>
-        public Task<UserWithPasswordDao> GetUserWithPasswordByEmail(
+        Task<UserWithPasswordDao> GetUserWithPasswordByEmail(
             string email,
             CancellationToken ct);
 

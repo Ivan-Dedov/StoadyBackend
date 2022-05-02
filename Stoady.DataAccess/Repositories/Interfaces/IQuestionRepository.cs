@@ -10,13 +10,6 @@ namespace Stoady.DataAccess.Repositories.Interfaces
     public interface IQuestionRepository
     {
         /// <summary>
-        /// Получает вопрос по ID
-        /// </summary>
-        Task<QuestionDao> GetQuestionById(
-            long id,
-            CancellationToken ct);
-
-        /// <summary>
         /// Получает все вопросы по ID темы
         /// </summary>
         Task<IEnumerable<QuestionDao>> GetQuestionsByTopicId(

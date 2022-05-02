@@ -9,7 +9,8 @@ using Microsoft.Extensions.Logging;
 
 namespace Stoady.Helpers
 {
-    internal sealed class ExceptionHandlingMiddleware : IMiddleware
+    internal sealed class ExceptionHandlingMiddleware
+        : IMiddleware
     {
         private readonly ILogger<ExceptionHandlingMiddleware> _logger;
 

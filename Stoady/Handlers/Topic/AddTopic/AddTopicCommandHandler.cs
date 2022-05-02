@@ -22,13 +22,16 @@ namespace Stoady.Handlers.Topic.AddTopic
     {
         private readonly ITopicRepository _topicRepository;
         private readonly ILogger<AddTopicCommandHandler> _logger;
+        private readonly ISubjectRepository _subjectRepository;
 
         public AddTopicCommandHandler(
             ILogger<AddTopicCommandHandler> logger,
-            ITopicRepository topicRepository)
+            ITopicRepository topicRepository,
+            ISubjectRepository subjectRepository)
         {
             _logger = logger;
             _topicRepository = topicRepository;
+            _subjectRepository = subjectRepository;
         }
 
         public async Task<Unit> Handle(
@@ -36,6 +39,13 @@ namespace Stoady.Handlers.Topic.AddTopic
             CancellationToken ct)
         {
             var (subjectId, topicName, topicDescription) = request;
+
+            if (await _subjectRepository.GetSubjectById(subjectId, ct) is null)
+            {
+                var message = $"Could not find topic with ID = {subjectId}";
+                _logger.LogWarning(message);
+                throw new ApplicationException(message);
+            }
 
             var result = await _topicRepository.AddTopic(
                 new AddTopicParameters

@@ -17,42 +17,20 @@ namespace Stoady.DataAccess.Repositories
     {
         /// <inheritdoc />
         public async Task<UserDao> GetUserById(
-            long id,
+            long userId,
             CancellationToken ct)
         {
             await using var dbConnection = new NpgsqlConnection(RepositorySettings.ConnectionString);
             return await dbConnection.QuerySingleOrDefaultAsync<UserDao>(
                 new CommandDefinition(
-                    @"SELECT 
+                    @"SELECT
                     u.id as Id,
                     u.username as Username,
                     u.email as Email,
                     u.avatarId as AvatarId
                     FROM users u
-                    WHERE u.Id = @id",
-                    new { id },
-                    commandTimeout: RepositorySettings.TimeoutSeconds,
-                    cancellationToken: ct));
-        }
-
-        /// <inheritdoc />
-        public async Task<UserDao> GetUser(
-            string email,
-            string password,
-            CancellationToken ct)
-        {
-            await using var dbConnection = new NpgsqlConnection(RepositorySettings.ConnectionString);
-            return await dbConnection.QuerySingleOrDefaultAsync<UserDao>(
-                new CommandDefinition(
-                    @"SELECT 
-                    u.id as Id,
-                    u.username as Username,
-                    u.email as Email,
-                    u.avatarId as AvatarId
-                    FROM users u
-                    WHERE email = @email 
-                    AND password = @password",
-                    new { email, password },
+                    WHERE u.id = @id",
+                    new { id = userId },
                     commandTimeout: RepositorySettings.TimeoutSeconds,
                     cancellationToken: ct));
         }

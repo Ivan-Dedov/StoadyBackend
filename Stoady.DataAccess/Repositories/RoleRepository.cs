@@ -14,24 +14,6 @@ namespace Stoady.DataAccess.Repositories
     public sealed class RoleRepository : IRoleRepository
     {
         /// <inheritdoc />
-        public async Task<RoleDao> GetRoleById(
-            long id,
-            CancellationToken ct)
-        {
-            await using var dbConnection = new NpgsqlConnection(RepositorySettings.ConnectionString);
-            return await dbConnection.QuerySingleOrDefaultAsync<RoleDao>(
-                new CommandDefinition(
-                    @"SELECT
-                    r.id as Id,
-                    r.name as Name
-                    FROM roles r
-                    WHERE id = @id",
-                    new { id },
-                    commandTimeout: RepositorySettings.TimeoutSeconds,
-                    cancellationToken: ct));
-        }
-
-        /// <inheritdoc />
         public async Task<RoleDao> GetRoleByName(
             string name,
             CancellationToken ct)

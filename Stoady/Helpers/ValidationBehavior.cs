@@ -10,10 +10,16 @@ using MediatR;
 namespace Stoady.Helpers
 {
     public sealed class ValidationBehavior<TRequest, TResponse>
-        : IPipelineBehavior<TRequest, TResponse> where TRequest : class, IRequest<TResponse>
+        : IPipelineBehavior<TRequest, TResponse>
+        where TRequest : class, IRequest<TResponse>
     {
         private readonly IEnumerable<IValidator<TRequest>> _validators;
-        public ValidationBehavior(IEnumerable<IValidator<TRequest>> validators) => _validators = validators;
+
+        public ValidationBehavior(
+            IEnumerable<IValidator<TRequest>> validators)
+        {
+            _validators = validators;
+        }
 
         public async Task<TResponse> Handle(
             TRequest request,

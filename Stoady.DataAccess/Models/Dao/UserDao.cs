@@ -1,5 +1,3 @@
-using System;
-
 namespace Stoady.DataAccess.Models.Dao
 {
     public sealed class UserDao

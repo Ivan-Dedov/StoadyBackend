@@ -30,7 +30,7 @@ namespace Stoady.Controllers
         /// Авторизовать пользователя по почте и паролю
         /// </summary>
         [HttpPost("authorize")]
-        public async Task<ActionResult<AuthorizationResponse>> Authenticate(
+        public async Task<ActionResult<AuthorizationResponse>> Authorize(
             [FromBody] AuthorizationRequest request,
             CancellationToken ct)
         {

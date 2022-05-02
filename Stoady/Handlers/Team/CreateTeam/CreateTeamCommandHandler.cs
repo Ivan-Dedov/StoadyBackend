@@ -24,13 +24,16 @@ namespace Stoady.Handlers.Team.CreateTeam
 
         private readonly ITeamRepository _teamRepository;
         private readonly ILogger<CreateTeamCommandHandler> _logger;
+        private readonly IUserRepository _userRepository;
 
         public CreateTeamCommandHandler(
             ILogger<CreateTeamCommandHandler> logger,
-            ITeamRepository teamRepository)
+            ITeamRepository teamRepository,
+            IUserRepository userRepository)
         {
             _logger = logger;
             _teamRepository = teamRepository;
+            _userRepository = userRepository;
         }
 
         public async Task<Unit> Handle(
@@ -38,6 +41,13 @@ namespace Stoady.Handlers.Team.CreateTeam
             CancellationToken ct)
         {
             var (userId, teamName) = request;
+
+            if (await _userRepository.GetUserById(userId, ct) is null)
+            {
+                var message = $"Could not find user with ID = {userId}";
+                _logger.LogWarning(message);
+                throw new ApplicationException(message);
+            }
 
             var result = await _teamRepository.CreateTeam(
                 new CreateTeamParameters
