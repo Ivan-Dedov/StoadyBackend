@@ -42,7 +42,7 @@ namespace Stoady.Handlers.Subject.AddSubject
 
             if (await _teamRepository.GetTeamById(teamId, ct) is null)
             {
-                var message = $"Could not find topic with ID = {teamId}";
+                var message = $"Could not find team with ID = {teamId}";
                 _logger.LogWarning(message);
                 throw new ApplicationException(message);
             }

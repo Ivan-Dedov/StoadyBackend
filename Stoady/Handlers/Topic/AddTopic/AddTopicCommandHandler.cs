@@ -42,7 +42,7 @@ namespace Stoady.Handlers.Topic.AddTopic
 
             if (await _subjectRepository.GetSubjectById(subjectId, ct) is null)
             {
-                var message = $"Could not find topic with ID = {subjectId}";
+                var message = $"Could not find subject with ID = {subjectId}";
                 _logger.LogWarning(message);
                 throw new ApplicationException(message);
             }

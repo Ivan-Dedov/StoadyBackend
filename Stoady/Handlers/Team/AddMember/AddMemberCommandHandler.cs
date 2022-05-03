@@ -58,14 +58,28 @@ namespace Stoady.Handlers.Team.AddMember
 
             await Task.WhenAll(userTask, roleTask);
 
-            var result = await _teamRepository.AddMember(
-                new AddMemberParameters
-                {
-                    TeamId = teamId,
-                    UserId = userTask.Result.Id,
-                    RoleId = roleTask.Result.Id
-                },
-                ct);
+            if (userTask.Result is null)
+            {
+                throw new ApplicationException($"User with email = {email} does not exist.");
+            }
+
+            int result;
+            try
+            {
+                result = await _teamRepository.AddMember(
+                    new AddMemberParameters
+                    {
+                        TeamId = teamId,
+                        UserId = userTask.Result.Id,
+                        RoleId = roleTask.Result.Id
+                    },
+                    ct);
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException(
+                    $"Something went wrong when adding user:{Environment.NewLine}{ex.Message}");
+            }
 
             if (result != 1)
             {
